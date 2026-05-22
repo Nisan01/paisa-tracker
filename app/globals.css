@@ -1,6 +1,35 @@
   @import "tailwindcss";
   @import "tw-animate-css";
   @import "shadcn/tailwind.css";
+  @plugin 'tailwind-scrollbar';
+
+/* Custom scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(14, 165, 233, 0.7);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 165, 233, 1);
+}
+
+@font-face {
+  font-family: 'az';
+  src: url('/paisa-tracker/assets/fonts/az.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
 
   @theme inline {
     --color-background: var(--background);
@@ -46,6 +75,7 @@
     --radius-4xl: calc(var(--radius) * 2.6);
     --animate-marquee: marquee var(--duration) infinite linear;
     --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  }
   @keyframes marquee {
   from {
     transform: translateX(0);
@@ -62,7 +92,41 @@
     transform: translateY(calc(-100% - var(--gap)));
         }
     }
+
+
+
+  @keyframes stroke-draw {
+    0% {
+      stroke-dashoffset: 4500;
+    }
+    
+    100% {
+      stroke-dashoffset: 0;
+    }
   }
+
+  @keyframes pulse-ring {
+    0%, 100% {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+    50% {
+      opacity: 0.3;
+      transform: scale(1.2);
+    }
+  }
+
+  .animate-stroke-draw {
+    animation: stroke-draw 2s ease-in-out infinite;
+  }
+
+  .account-card-bank  { background: linear-gradient(135deg, #1a3a6e, #2563c4, #3b82f6); }
+.account-card-cash  { background: linear-gradient(135deg, #14532d, #16a34a, #22c55e); }
+.account-card-esewa { background: linear-gradient(135deg, #7c2d12, #ea580c, #fb923c); }
+.account-card-khalti{ background: linear-gradient(135deg, #4a1d96, #7c3aed, #a78bfa); }
+
+.card-shine { background: linear-gradient(105deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04), transparent); }
+
 
   @custom-variant dark (&:is(.dark *));
 
@@ -131,6 +195,7 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+  
   }
 
   @layer base {

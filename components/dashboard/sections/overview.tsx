@@ -1,0 +1,411 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+import { MetricCard } from "@/components/dashboard/metric-card";
+import { IncomeExpenseChart } from "@/components/dashboard/charts/income-expense-chart";
+import { ExpenseCategories } from "@/components/dashboard/charts/expense-categories";
+import { RecentTransactions } from "@/components/dashboard/recent-transactions";
+import { BudgetProgress } from "@/components/dashboard/budget-progress";
+
+import {
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  PiggyBank,
+} from "lucide-react";
+
+import { useSession } from "next-auth/react";
+import { LoanStatus } from "@/components/dashboard/loan-status";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "@tanstack/react-query";
+
+type Props = {
+  onNavigate: (section: string) => void;
+};
+
+interface OverviewData {
+  totalBalance: number;
+  totalIncome: number;
+  totalExpenses: number;
+
+  transactionsData: any[];
+  allTransactionsData: any[];
+  budgetsData: any[];
+
+  balanceChangeRate: number;
+  loanData: any[];
+}
+
+const months = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+];
+
+function formatCurrency(value: number): string {
+  if (value >= 10000000) return `Rs. ${(value / 10000000).toFixed(1)}Cr`;
+  if (value >= 100000) return `Rs. ${(value / 100000).toFixed(1)}L`;
+  if (value >= 1000) return `Rs. ${(value / 1000).toFixed(1)}K`;
+  return `Rs. ${value}`;
+}
+
+function convertMonth(dateString: string): string {
+  const date = new Date(dateString);
+  return date.toLocaleString("default", { month: "short" });
+}
+
+function getLastNMonths(n: number) {
+  const months: string[] = [];
+  const now = new Date();
+
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i);
+    months.push(`${d.getFullYear()}-${d.getMonth()}`);
+  }
+
+  return months;
+}
+
+export function OverviewSection({ onNavigate }: Props) {
+  const { data: session, status } = useSession();
+
+  const fetchOverview = async (): Promise<OverviewData> => {
+    if (!session?.user?.id) {
+      throw new Error("No user session");
+    }
+
+    const res = await fetch("/api/dashboard/overview", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        currentUserId: session.user.id,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch overview");
+    }
+
+    return res.json();
+  };
+
+  const fetchAccounts = async () => {
+    const res = await fetch(
+      `/api/dashboard/account?userId=${session?.user?.id}`
+    );
+
+    if (!res.ok) throw new Error("Failed to fetch accounts");
+
+    return res.json();
+  };
+
+  const { data: accountsData } = useQuery({
+    queryKey: ["accounts", session?.user?.id],
+    queryFn: fetchAccounts,
+    enabled: !!session?.user?.id,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const {
+    data: overviewData,
+    isLoading: isLoadingData,
+    error,
+  } = useQuery({
+    queryKey: ["overview", session?.user?.id],
+    queryFn: fetchOverview,
+
+    enabled: !!session?.user?.id,
+
+    staleTime: 1000 * 60 * 2,
+  });
+
+  // ======================
+  // SAFE VALUES
+  // ======================
+  const accountList = accountsData?.accounts || [];
+  const income = overviewData?.totalIncome || 0;
+  const expenses = overviewData?.totalExpenses || 0;
+
+  const totalBalance = accountList.reduce(
+    (sum: number, acc: any) => sum + Number(acc.balance || 0),
+    0
+  );
+
+  const savingsRate =
+    income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
+
+  const balanceChange = overviewData?.balanceChangeRate || 0;
+
+  // ======================
+  // BUDGET TRANSFORM
+  // ======================
+  const transformedBudgets =
+    (overviewData?.budgetsData || []).map((budget: any) => {
+      const spent = (overviewData?.allTransactionsData || [])
+        .filter(
+          (tx: any) =>
+            tx.type === "expense" &&
+            tx.category?.toLowerCase() === budget.category?.toLowerCase()
+        )
+        .reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0);
+
+      return {
+        category: budget.category,
+        budget: Number(budget.amount || 0),
+        spent,
+      };
+    });
+
+  const transactions = overviewData?.transactionsData || [];
+  const allTransactions = overviewData?.allTransactionsData || [];
+  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const currentMonth = now.getMonth();
+  const previousMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+  const previousYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+  const getMonthTotals = (year: number, month: number) => {
+    return allTransactions
+      .filter((tx: any) => {
+        if (!tx.date) return false;
+        const date = new Date(tx.date);
+        return date.getFullYear() === year && date.getMonth() === month;
+      })
+      .reduce(
+        (acc: { income: number; expense: number }, tx: any) => {
+          const amount = Math.abs(Number(tx.amount || 0));
+          if (tx.type === "income") acc.income += amount;
+          if (tx.type === "expense") acc.expense += amount;
+          return acc;
+        },
+        { income: 0, expense: 0 }
+      );
+  };
+
+  const currentTotals = getMonthTotals(currentYear, currentMonth);
+  const previousTotals = getMonthTotals(previousYear, previousMonth);
+
+  const formatChange = (current: number, previous: number) => {
+    if (!previous) {
+      return current ? 100 : 0;
+    }
+
+    return ((current - previous) / previous) * 100;
+  };
+
+  const incomeChange = formatChange(
+    currentTotals.income,
+    previousTotals.income
+  );
+
+  const expenseChange = formatChange(
+    currentTotals.expense,
+    previousTotals.expense
+  );
+
+  const currentSavingsRate =
+    currentTotals.income > 0
+      ? ((currentTotals.income - currentTotals.expense) /
+          currentTotals.income) *
+        100
+      : 0;
+
+  const previousSavingsRate =
+    previousTotals.income > 0
+      ? ((previousTotals.income - previousTotals.expense) /
+          previousTotals.income) *
+        100
+      : 0;
+
+  const savingsRateChange = currentSavingsRate - previousSavingsRate;
+
+  // ======================
+  // GROUP TRANSACTIONS
+  // ======================
+  const grouped: Record<number, { income: number; expense: number }> = {};
+
+  for (const tx of transactions) {
+    if (!tx.date) continue;
+
+    const date = new Date(tx.date);
+    if (date.getFullYear() !== currentYear) continue;
+
+    const month = date.getMonth();
+    const amount = Number(tx.amount || 0);
+
+    if (!grouped[month]) {
+      grouped[month] = { income: 0, expense: 0 };
+    }
+
+    if (tx.type === "income") {
+      grouped[month].income += amount;
+    }
+
+    if (tx.type === "expense") {
+      grouped[month].expense += amount;
+    }
+  }
+
+  // ======================
+  // CHART DATA
+  // ======================
+  const chartData = months.map((month, index) => ({
+    month,
+    income: grouped[index]?.income || 0,
+    expense: grouped[index]?.expense || 0,
+  }));
+
+
+
+  const colorList = [
+    "#ef4444",
+    "#f97316",
+    "#eab308",
+    "#22c55e",
+    "#3b82f6",
+    "#8b5cf6",
+    "#ec4899",
+    "#14b8a6",
+  ];
+
+  const budgetData =
+    overviewData?.budgetsData.map((b: any) => ({
+      name: b.category,
+      value: Number(b.amount || 0),
+      color: colorList[Math.floor(Math.random() * colorList.length)],
+    })) || [];
+
+  console.log(budgetData);
+
+  if (error) {
+    return <div>Failed to load overview data.</div>;
+  }
+  // ======================
+  // LOADING UI
+  // ======================
+  if (status === "loading" || isLoadingData) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="bg-card border border-border rounded-xl p-6"
+            >
+              <Skeleton className="h-4 w-24 mb-3" />
+              <Skeleton className="h-8 w-32" />
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[1, 2].map((i) => (
+            <div
+              key={`chart-${i}`}
+              className="bg-card border border-border rounded-xl p-6 min-h-[40vh]"
+            >
+              <Skeleton className="h-5 w-36 mb-4" />
+              <Skeleton className="h-52 w-full" />
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[55vh]">
+          {[1, 2].map((i) => (
+            <div
+              key={`panel-${i}`}
+              className="bg-card border border-border rounded-xl p-6"
+            >
+              <Skeleton className="h-5 w-40 mb-4" />
+              <div className="space-y-3">
+                {[1, 2, 3, 4].map((row) => (
+                  <Skeleton key={`row-${i}-${row}`} className="h-10 w-full" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-6">
+          <Skeleton className="h-5 w-32 mb-4" />
+          <div className="space-y-3">
+            {[1, 2, 3].map((row) => (
+              <Skeleton key={`loan-${row}`} className="h-12 w-full" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ======================
+  // MAIN UI
+  // ======================
+  return (
+    <div className="space-y-6">
+
+      {/* METRICS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <MetricCard
+          title="Total Balance"
+          value={formatCurrency(totalBalance)}
+          change={`${balanceChange.toFixed(1)}%`}
+          changeType={balanceChange >= 0 ? "positive" : "negative"}
+          icon={Wallet}
+          delay={0}
+        />
+
+        <MetricCard
+          title="Total Income"
+          value={formatCurrency(income)}
+          change={`${incomeChange.toFixed(1)}%`}
+          changeType={incomeChange >= 0 ? "positive" : "negative"}
+          icon={TrendingUp}
+          delay={1}
+        />
+
+        <MetricCard
+          title="Total Expenses"
+          value={formatCurrency(expenses)}
+          change={`${expenseChange.toFixed(1)}%`}
+          changeType={expenseChange <= 0 ? "positive" : "negative"}
+          icon={TrendingDown}
+          delay={2}
+        />
+
+        <MetricCard
+          title="Savings Rate"
+          value={`${savingsRate}%`}
+          change={`${savingsRateChange.toFixed(1)}%`}
+          changeType={savingsRateChange >= 0 ? "positive" : "negative"}
+          icon={PiggyBank}
+          delay={3}
+        />
+      </div>
+
+      {/* CHARTS */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <IncomeExpenseChart data={chartData} />
+        <ExpenseCategories data={budgetData} />
+      </div>
+
+      {/* BOTTOM SECTION */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[55vh]">
+        <RecentTransactions
+          transactions={overviewData?.transactionsData?.slice(0, 4) || []}
+          onNavigateSection={onNavigate}
+        />
+
+        <BudgetProgress
+          budgets={transformedBudgets}
+          onNavigateSection={onNavigate}
+        />
+      </div>
+
+      {/* LOANS */}
+      <LoanStatus loans={overviewData?.loanData || []} />
+    </div>
+  );
+}

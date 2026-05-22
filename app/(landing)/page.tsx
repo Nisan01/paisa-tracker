@@ -1,15 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import LandingPage from "../_components/LandingPage/LandingPage";
-import Navbar from "../_components/_components/Navbar";
-import ScrollChanged from "@/components/mindloop/ScrollTextChange";
-import Hero from "@/app/_components/_components/Hero";
-import Mission from "@/components/mindloop/Mission";
-import Solution from "@/components/mindloop/Solution";
-import Pricing from "@/components/mindloop/Pricing";
-import CTA from "@/components/mindloop/CTA";
-import Footer from "@/components/mindloop/Footer";
+import Navbar from "./_components/Navbar";
+import ScrollChanged from "@/app/(landing)/_components/ScrollTextChange";
+import Hero from "@/app/(landing)/_components/Hero";
+import Mission from "@/app/(landing)/_components/Mission";
+import Solution from "@/app/(landing)/_components/Solution";
+import Pricing from "@/app/(landing)/_components/Pricing";
+import CTA from "@/app/(landing)/_components/CTA";
+import Footer from "@/app/(landing)/_components/Footer";
 import ScrollPage from "../test2/page";
 
 

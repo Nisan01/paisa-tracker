@@ -1,4 +1,4 @@
-import Navbar from "../_components/_components/Navbar";
+import Navbar from "./_components/Navbar";
 import SmoothScroll from "@/components/SmoothScroll/SmoothScroll";
 
 export default function MarketingLayout({
