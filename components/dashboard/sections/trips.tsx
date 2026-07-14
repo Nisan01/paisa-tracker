@@ -353,67 +353,85 @@ export function TripsSection() {
   return (
     <div className="space-y-6">
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-border bg-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+     
+   <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    
+        <div
+          className=" group relative bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${1 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden"/> Trips</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+            {trips.length}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
                 <Plane className="w-5 h-5 text-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Trips</p>
-                <p className="text-xl font-bold text-foreground">{trips.length}</p>
-              </div>
+
             </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-accent/60 flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Budget</p>
-                <p className="text-xl font-bold text-foreground">Rs {totalTripBudget.toLocaleString()}</p>
-              </div>
+          </div>
+        </div>
+        <div
+          className="hidden md:block group relative bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${1 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden"/> Budget</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                 Rs {totalTripBudget.toLocaleString()}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border bg-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                <TrendingDown className="w-5 h-5 text-destructive" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Spent</p>
-                <p className="text-xl font-bold text-destructive">Rs {totalTripSpent.toLocaleString()}</p>
-              </div>
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                               <DollarSign className="w-5 h-5 text-yellow-500" />
+
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+
+        <div
+          className="group relative bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${2 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden"/> Spent</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                 Rs &nbsp;&nbsp;{totalTripSpent.toLocaleString()}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+ <TrendingDown className="w-5 h-5 text-destructive" />            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Search and Add */}
-      <div className="flex items-center justify-between gap-4">
+
+
+
+
+      <div className="flex items-center justify-between gap-4 ">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="Search trips..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 w-80 h-9 bg-card border-border"
+            className="pl-10  h-9 bg-card border-border"
           />
         </div>
         <Button onClick={() => setIsAddTripOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Trip
+          <Plus className="w-4 h-4 md:mr-2" />
+          Add <span className="hidden md:inline">Trip</span>
         </Button>
       </div>
 
-      {/* Loading Skeletons */}
+
       {loadingState && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
@@ -453,8 +471,16 @@ export function TripsSection() {
 
       {/* Empty State */}
       {!loadingState && !isData && (
-        <div className="flex items-center justify-center h-[60vh]">
-          <p className="text-sm text-muted-foreground">No trips planned yet</p>
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+            <Plane className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium text-foreground mb-1">No trips yet</p>
+          <p className="text-sm text-muted-foreground mb-4">Plan your first trip to start tracking</p>
+          <Button onClick={() => setIsAddTripOpen(true)} className="cursor-pointer">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Trip
+          </Button>
         </div>
       )}
 
@@ -639,7 +665,7 @@ export function TripsSection() {
 
                       {/* Expenses */}
                       {tripExpenses.length > 0 ? (
-                        <div className="space-y-1 max-h-24 min-h-24  overflow-y-auto pr-1">
+                        <div className="space-y-1 max-h-24 md:min-h-24 min-h-34  overflow-y-auto pr-1">
                           {tripExpenses.map((exp) => (
                             <div
                               key={exp.id}

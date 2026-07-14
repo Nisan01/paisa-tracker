@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { ArrowDownRight, ArrowUpRight, PieChart } from "lucide-react";
+import type { Section } from "@/app/dashboard/page";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
@@ -31,7 +32,7 @@ const categoryColors = [
   "#14b8a6",
 ];
 
-export function AnalysisSection() {
+export function AnalysisSection({ onNavigate }: { onNavigate?: (section: Section) => void }) {
   const { data: session } = useSession();
   const [analysisText, setAnalysisText] = useState("");
 
@@ -113,7 +114,7 @@ export function AnalysisSection() {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="border-border bg-card">
               <CardContent className="p-5">
@@ -141,6 +142,23 @@ export function AnalysisSection() {
     );
   }
 
+  if (txList.length === 0) {
+    return (
+      <div className="flex min-h-[65vh] flex-col items-center justify-center px-4">
+        <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+          <PieChart className="w-10 h-10 text-muted-foreground" />
+        </div>
+        <p className="text-lg font-medium text-foreground mb-1">No transactions yet</p>
+        <p className="text-sm text-muted-foreground mb-4">Add your first transaction to start tracking</p>
+        {onNavigate && (
+          <Button onClick={() => onNavigate("transactions")}>
+            Add Transaction
+          </Button>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Section Header */}
@@ -153,7 +171,7 @@ export function AnalysisSection() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card className="border-border bg-card">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
@@ -216,9 +234,18 @@ export function AnalysisSection() {
         </CardHeader>
         <CardContent className="px-5 pb-5">
           {categoryList.length === 0 ? (
-            <p className="text-sm text-muted-foreground">
-              No expense data available.
-            </p>
+            <div className="flex flex-col items-center justify-center py-16 px-4">
+              <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+                <PieChart className="w-10 h-10 text-muted-foreground" />
+              </div>
+              <p className="text-lg font-medium text-foreground mb-1">No expenses yet</p>
+              <p className="text-sm text-muted-foreground mb-4">Add a transaction to see categories</p>
+              {onNavigate && (
+                <Button size="sm" onClick={() => onNavigate("transactions")}>
+                  Add Expense
+                </Button>
+              )}
+            </div>
           ) : (
             <div className="space-y-4">
               {categoryList.map((cat, index) => (

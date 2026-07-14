@@ -109,9 +109,7 @@ export function AccountsSection() {
       .toLowerCase()
       .includes(searchQuery.toLowerCase())
   );
-  // =========================
-  // ADD ACCOUNT
-  // =========================
+  
 
   const createAccount = async (payload: any) => {
     const res = await fetch("/api/dashboard/account", {
@@ -133,7 +131,9 @@ export function AccountsSection() {
     mutationFn: createAccount,
 
     onSuccess: () => {
-      toast.success("Account added successfully!");
+      toast.success("Account added successfully!",{
+        position:"bottom-right"
+      });
 
       queryClient.invalidateQueries({
         queryKey: ["accounts", session?.user?.id],
@@ -219,9 +219,7 @@ const isFormValid =
   return (
     <div className={`space-y-6 ${mutation.isPending ? "pointer-events-none opacity-50" : ""}`}>
 
-      {/* Summary Cards - Match Overview Style */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-        {/* Total Balance Card */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-2 gap-4">
         <div className="group relative bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
         style={
           { animationDelay: `${0 * 100}ms`, animationFillMode: "both" }
@@ -229,8 +227,8 @@ const isFormValid =
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="relative flex items-start justify-between">
             <div>
-              <p className="text-sm text-muted-foreground font-medium mb-2">Total Balance</p>
-              <p className="text-2xl font-bold text-foreground tracking-tight">
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden" /> Balance</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
                 Rs {(totalBalance ?? 0).toLocaleString()}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
@@ -243,7 +241,6 @@ const isFormValid =
           </div>
         </div>
 
-        {/* Active Accounts Card */}
         <div className="group relative bg-green-500/10 border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
          style={
           { animationDelay: `${1 * 100}ms`, animationFillMode: "both" }
@@ -251,8 +248,8 @@ const isFormValid =
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           <div className="relative flex items-start justify-between">
             <div>
-              <p className="text-sm text-muted-foreground font-medium mb-2">Active Accounts</p>
-              <p className="text-2xl font-bold text-foreground tracking-tight">{accountList.length}</p>
+              <p className="md:text-2xl text-sm text-muted-foreground font-medium mb-2">Active Accounts</p>
+              <p className="text-lg font-bold text-foreground tracking-tight">{accountList.length}</p>
               <p className="text-xs text-green-600 mt-1 flex items-center">
                 <TrendingUp className="w-3 h-3 mr-1" />
                 All synced
@@ -267,30 +264,29 @@ const isFormValid =
 
       </div>
 
-      {/* Search and Filter */}
       <div className="flex items-center justify-between gap-4  transition-all duration-300 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
         style={
           { animationDelay: `${2 * 100}ms`, animationFillMode: "both" }
         }>
         <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
+          <div className="relative flex-1  max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search accounts..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-80  h-9 bg-card border-border"
+              className="pl-10 max-w-80  h-9 bg-card border-border"
             />
           </div>
-          <Badge variant="outline" className="px-3 py-1.5 text-sm">
+          <Badge variant="outline" className="px-3 hidden md:block py-1.5 text-sm">
             {filteredAccounts.length} account{filteredAccounts.length !== 1 ? "s" : ""}
           </Badge>
         </div>
 
 
-        <Button className="bg-primary/90 px-20   cursor-pointer hover:bg-primary text-primary-foreground" onClick={() => setIsAddDialogOpen(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Account
+        <Button className="bg-primary px-20   cursor-pointer hover:bg-gray-300 text-primary-foreground" onClick={() => setIsAddDialogOpen(true)}>
+          <Plus className="w-4 h-4 mr-0 md:mr-2" />
+          Add <span className="hidden md:inline">Account</span>
         </Button>
 
       </div>

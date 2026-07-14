@@ -58,6 +58,22 @@ export function LoanStatus({ loans }: LoanStatusProps) {
     return new Date(date).toLocaleDateString("en-US", { month: "short", day: "numeric" });
   };
 
+const formatAmount = (amount: number) => {
+  if (amount >= 1_000_000_000) {
+    return (amount / 1_000_000_000).toFixed(1).replace(".0", "") + "B";
+  }
+
+  if (amount >= 1_000_000) {
+    return (amount / 1_000_000).toFixed(1).replace(".0", "") + "M";
+  }
+
+  if (amount >= 1_000) {
+    return (amount / 1_000).toFixed(1).replace(".0", "") + "K";
+  }
+
+  return amount.toString();
+};
+
   const LoanItem = ({ loan }: { loan: Loan }) => {
     const time = getTimeLeft(loan.dueDate);
 
@@ -76,33 +92,43 @@ export function LoanStatus({ loans }: LoanStatusProps) {
             <p className="text-xs text-muted-foreground">Due {formatDate(loan.dueDate)}</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <p className="text-sm font-semibold text-foreground">Rs {loan.remainingAmount.toLocaleString()}</p>
-          {time.urgent && (
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${time.overdue ? "bg-destructive/10 text-destructive" : "bg-warning/10 text-warning"}`}>
-              {time.overdue ? <AlertCircle className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
-              {time.text}
-            </div>
-          )}
-        </div>
+  <div className="flex items-center justify-end gap-3 flex-shrink-0">
+  <p className="w-20 text-right text-sm font-semibold text-foreground">
+    Rs {formatAmount(loan.remainingAmount)}
+  </p>
+
+  <div className="w-24 flex justify-end">
+    {time.urgent && (
+      <div
+        className={`inline-flex items-center gap-1 h-6 rounded-full px-2 text-xs font-medium whitespace-nowrap ${
+          time.overdue
+            ? "bg-destructive/10 text-destructive"
+            : "bg-yellow-500/10 text-yellow-500"
+        }`}
+      >
+        {time.overdue ? (
+          <AlertCircle className="h-3 w-3" />
+        ) : (
+          <Clock className="h-3 w-3" />
+        )}
+        {time.text}
+      </div>
+    )}
+  </div>
+</div>
       </div>
     );
   };
 
   return (
     <Card className="border-border ">
-      {/* Header */}
       <div className="p-4 border-b-2  bg-secondary/30">
         <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-foreground">Loan Due Dates</h2>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-green-500 font-medium">Rs {totalLent.toLocaleString()}</span>
-            <span className="text-sm text-destructive font-medium">Rs {totalBorrowed.toLocaleString()}</span>
-          </div>
+          <h2 className="text-base font-semibold text-foreground">Loan Dues </h2>
+       
         </div>
       </div>
 
-      {/* Loan Lent */}
       <div className="p-3 border-b border-border">
         <div className="flex items-center gap-2 mb-2">
           <ArrowRightLeft className="w-4 h-4 text-green-500 rotate-180" />
@@ -117,7 +143,6 @@ export function LoanStatus({ loans }: LoanStatusProps) {
         )}
       </div>
 
-      {/* Loan Borrowed */}
       <div className="p-3">
         <div className="flex items-center gap-2 mb-2">
           <ArrowRightLeft className="w-4 h-4 text-destructive" />

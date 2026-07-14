@@ -38,6 +38,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { TransactionsPdf } from "@/components/dashboard/sections/transactions-pdf";
+import { useMediaQuery } from "usehooks-ts";
+
 
 interface Transaction {
   id: string;
@@ -100,11 +102,11 @@ export function TransactionsSection() {
   const { data: session } = useSession();
 
   const queryClient = useQueryClient();
+  const is1292 = useMediaQuery("(min-width: 1292px)");
+const is1520 = useMediaQuery("(min-width: 1520px)");
 
-  // =========================
-  // FETCH TRANSACTIONS
-  // =========================
-
+const visibleCategories = is1520 ? 11 : 9;
+  
   const fetchTransactions = async () => {
     const res = await fetch(
       `/api/dashboard/transaction?userId=${session?.user?.id}`
@@ -225,7 +227,9 @@ export function TransactionsSection() {
     mutationFn: createTransaction,
 
     onSuccess: () => {
-      toast.success("Transaction added successfully!");
+      toast.success("Transaction added successfully!",{
+        position:"bottom-right"
+      });
 
       queryClient.invalidateQueries({
         queryKey: ["transactions", session?.user?.id],
@@ -362,87 +366,89 @@ const handleAddTransaction = () => {
         mutation.isPending ? "pointer-events-none opacity-50" : ""
       }`}
     >
-      {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-border bg-card transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
-           style={ { animationDelay: `${0 * 100}ms`, animationFillMode: "both" }}>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-accent/60 flex items-center justify-center">
-                <Wallet className="w-5 h-5 text-yellow-500 " />
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Total Balance
-                </p>
-
-                <p className="text-xl font-bold ">
-                  Rs {(totalBalance ?? 0).toLocaleString()}
-                </p>
-              </div>
+   
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          className="group relative bg-card hidden md:block border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${0 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total Balance</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                Rs {(totalBalance ?? 0).toLocaleString()}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-card  transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4" 
-        style={ { animationDelay: `${1 * 100}ms`, animationFillMode: "both" }}>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-accent/60 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-green-500 " />
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Total Income
-                </p>
-
-                <p className="text-xl font-bold text-green-500">
-                  Rs {totalIncome.toLocaleString()}
-                </p>
-              </div>
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-yellow-500" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="border-border bg-card transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
-           style={ { animationDelay: `${2 * 100}ms`, animationFillMode: "both" }}>
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                <TrendingDown className="w-5 h-5 text-destructive" />
-              </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Total Expenses
-                </p>
-
-                <p className="text-xl font-bold text-destructive">
-                  Rs {totalExpense.toLocaleString()}
-                </p>
-              </div>
+        <div
+          className="group relative bg-green-500/15 border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${1 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden"/> Income</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                Rs &nbsp;&nbsp;{totalIncome.toLocaleString()}
+              </p>
             </div>
-          </CardContent>
-        </Card>
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-green-500" />
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="group relative bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${2 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden"/> Expenses</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                Rs &nbsp;&nbsp;{totalExpense.toLocaleString()}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+              <TrendingDown className="w-5 h-5 text-destructive" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4  duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"    style={ { animationDelay: `${3 * 100}ms`, animationFillMode: "both" }}>
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative">
+   
+      <div className="flex w-full flex-col sm:flex-row items-start sm:items-center justify-between gap-4 duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4" style={ { animationDelay: `${3 * 100}ms`, animationFillMode: "both" }}>
+        <div className="flex w-full flex-wrap items-center gap-3 ">
+          <div className="flex w-full items-center gap-4 justify-between">   
+             <div className="relative w-full w-auto md:w-[450px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 
             <Input
               placeholder="Search transactions..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-[280px] bg-secondary border-border"
+              className="pl-10  md:w-full bg-secondary border-border"
             />
           </div>
+           <Button
+          className=" bg-primary/90 px-6 cursor-pointer hover:bg-primary text-primary-foreground sm:w-auto"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
+          <Plus className="w-4 h-4 mr-0 md:mr-2" />
+          Add <span className="hidden md:inline"> Transaction</span>
+        </Button>
+        </div>
+      
 
-          <div className="flex items-center gap-2">
+          <div className="flex mt-2 w-full items-center justify-between">
+          <div className="flex flex-wrap items-center gap-2">
             {["all", "income", "expense"].map((type) => (
               <Button
                 key={type}
@@ -460,24 +466,33 @@ const handleAddTransaction = () => {
               </Button>
             ))}
           </div>
+          <div className="block md:hidden"> <Button
+          variant="outline"
+          size="sm"
+          onClick={handleExport}
+          disabled={isExporting}
+          className="w-auto shrink-0 sm:w-auto"
+        >
+          <Download className="w-4 h-4 mr-2" />
+          {isExporting ? "Exporting..." : "Export"}
+        </Button></div>
+           
+          </div>
+
+          
+
         </div>
 
-        <Button
-          className=" bg-primary/90 px-6 cursor-pointer  hover:bg-primary text-primary-foreground"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Transaction
-        </Button>
+       
       </div>
 
-      {/* Category tabs */}
+    
       <div
-        className="flex items-center justify-between gap-3 pb-2 duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+        className="hidden md:flex flex-col items-start justify-between gap-3 pb-2 duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4 sm:flex-row sm:items-center"
         style={{ animationDelay: `${3 * 100}ms`, animationFillMode: "both" }}
       >
-        <div className="flex items-center gap-2 overflow-x-auto">
-          {displayedCategories.slice(0, 11).map((cat) => (
+        <div className="flex w-full items-center gap-2 overflow-x-auto sm:w-auto">
+          {displayedCategories.slice(0, visibleCategories).map((cat) => (
             <Button
               key={cat}
               variant={
@@ -497,7 +512,7 @@ const handleAddTransaction = () => {
           size="sm"
           onClick={handleExport}
           disabled={isExporting}
-          className="shrink-0"
+          className="w-full shrink-0 sm:w-auto"
         >
           <Download className="w-4 h-4 mr-2" />
           {isExporting ? "Exporting..." : "Export"}
@@ -509,7 +524,7 @@ const handleAddTransaction = () => {
         <Card className="border-border bg-card">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full min-w-[640px]">
                 <thead>
                   <tr className="border-b border-border bg-secondary/50">
                     <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -572,8 +587,16 @@ const handleAddTransaction = () => {
       )}
 
       {!isData && !loading && (
-        <div className="flex items-center text-gray-300 justify-center h-[60vh] ">
-          <h2 className="text-sm">No transactions found</h2>
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+            <Wallet className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium text-foreground mb-1">No transactions yet</p>
+          <p className="text-sm text-muted-foreground mb-4">Add your first transaction to start tracking</p>
+          <Button onClick={() => setIsAddDialogOpen(true)} className="cursor-pointer">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Transaction
+          </Button>
         </div>
       )}
 
@@ -582,8 +605,8 @@ const handleAddTransaction = () => {
         <Card className="border-border bg-card overflow-hidden  duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"    style={ { animationDelay: `${3 * 100}ms`, animationFillMode: "both" }}>
           <CardContent className="p-0 flex flex-col h-[460px]">
             {/* TABLE */}
-            <div className="flex-1 overflow-y-auto no-scrollbar">
-              <table className="w-full">
+            <div className="flex-1 overflow-x-auto overflow-y-auto no-scrollbar">
+              <table className="w-full min-w-[640px]">
                 <thead className="sticky top-0 z-10 bg-secondary/95 backdrop-blur border-b border-border">
                   <tr>
                     <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
@@ -759,17 +782,16 @@ const handleAddTransaction = () => {
         </Card>
       )}
 
-      {/* Add Transaction Dialog */}
       <Dialog
         open={isAddDialogOpen}
-        onOpenChange={setIsAddDialogOpen}
+        onOpenChange={setIsAddDialogOpen} 
       >
-        <DialogContent aria-describedby={undefined} className="sm:max-w-[425px] bg-white/13 backdrop-blur-3xl ">
+        <DialogContent aria-describedby={undefined} className="max-w-[380px] md:max-w-[425px] bg-white/13 backdrop-blur-3xl ">
           <DialogHeader>
             <DialogTitle>Add Transaction</DialogTitle>
           </DialogHeader>
 
-          <div className="grid gap-4 py-4">
+          <div className="grid  gap-2 md:gap-4 py-4">
             <div className="grid gap-2">
               <label className="text-sm font-medium">Type</label>
 

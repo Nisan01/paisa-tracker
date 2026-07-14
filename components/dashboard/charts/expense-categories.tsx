@@ -1,8 +1,10 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { ChartContainer } from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
+import type { Section } from "@/app/dashboard/page";
+import { PieChart as PieIcon } from "lucide-react";
 
 interface CategoryData {
   name: string;
@@ -12,51 +14,15 @@ interface CategoryData {
 
 interface ExpenseCategoriesProps {
   data: CategoryData[];
+  onNavigateSection?: (section: Section) => void;
 }
 
-function useContainerWidth(debounceMs: number = 400) {
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const resizeObserver = new ResizeObserver((entries) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-
-      timeoutRef.current = setTimeout(() => {
-        for (const entry of entries) {
-          setDimensions({
-            width: entry.contentRect.width,
-            height: entry.contentRect.height,
-          });
-        }
-      }, debounceMs);
-    });
-
-    resizeObserver.observe(container);
-    return () => {
-      resizeObserver.disconnect();
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-    };
-  }, [debounceMs]);
-
-  return { containerRef, ...dimensions };
-}
-
-export function ExpenseCategories({ data }: ExpenseCategoriesProps) {
+export function ExpenseCategories({ data, onNavigateSection }: ExpenseCategoriesProps) {
   const total = data.reduce((acc, item) => acc + item.value, 0);
-  const { containerRef, width } = useContainerWidth(400);
   const hasData = data.length > 0;
 
   return (
-    <div className="bg-card border border-border rounded-xl p-5 h-[380px] min-w-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 isolate"
+    <div className="bg-card border border-border rounded-xl p-5 min-h-[380px] min-w-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-300 isolate"
       style={{ animationDelay: "0.2s", animationFillMode: "both" }}>
       <div className="mb-4">
         <h3 className="text-base font-semibold text-foreground">
@@ -70,16 +36,31 @@ export function ExpenseCategories({ data }: ExpenseCategoriesProps) {
 
       {!hasData ? (
 
-        <div className="flex-1 flex items-center justify-center h-[33vh]">
-          <p className="text-sm text-muted-foreground">No expense data available</p>
+        <div className="flex-1 flex flex-col items-center justify-center h-[33vh]">
+          <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+            <PieIcon className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium text-foreground mb-1">No expenses yet</p>
+          <p className="text-sm text-muted-foreground mb-4">Add a transaction to see categories</p>
+          {onNavigateSection && (
+            <Button size="sm" onClick={() => onNavigateSection("transactions")}>
+              Add Expense
+            </Button>
+          )}
         </div>) : (
 
-        <div className="flex items-center gap-2">
+        <div className="md:flex items-center gap-2 min-w-0">
 
 
-          <div ref={containerRef} className="flex-1 h-[280px]">
+          <ChartContainer className="flex-1 h-[280px] min-h-[280px] min-w-0">
 
-            <ResponsiveContainer width="100%" height="100%" minWidth={100} minHeight={100} >
+            <ResponsiveContainer
+              width="100%"
+              height={280}
+              minWidth={100}
+              minHeight={200}
+              initialDimension={{ width: 280, height: 280 }}
+            >
               <PieChart>
                 <Pie
                   data={data}
@@ -105,7 +86,7 @@ export function ExpenseCategories({ data }: ExpenseCategoriesProps) {
                 />
               </PieChart>
             </ResponsiveContainer>
-          </div>
+          </ChartContainer>
           <div className="flex-1 space-y-2">
             {data.map((item) => (
               <div key={item.name} className="flex items-center justify-between">

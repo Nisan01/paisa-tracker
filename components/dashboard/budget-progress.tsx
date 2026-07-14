@@ -2,8 +2,9 @@
 
 import { Section } from "@/app/dashboard/page";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { AlertCircle, CheckCircle2 } from "lucide-react";
+import { AlertCircle, CheckCircle2, Target } from "lucide-react";
 
 interface Budget {
   category: string;
@@ -36,8 +37,15 @@ export function BudgetProgress({ budgets, onNavigateSection }: BudgetProgressPro
 
       {
         budgets.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center h-[33vh]">
-            <p className="text-sm text-muted-foreground">No budget data available</p>
+          <div className="flex-1 flex flex-col items-center justify-center h-[33vh]">
+            <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+              <Target className="w-10 h-10 text-muted-foreground" />
+            </div>
+            <p className="text-lg font-medium text-foreground mb-1">No budgets yet</p>
+            <p className="text-sm text-muted-foreground mb-4">Set a budget to start tracking</p>
+            <Button size="sm" onClick={() => onNavigateSection("budgets")}>
+              Add Budget
+            </Button>
           </div>) : (
 
 

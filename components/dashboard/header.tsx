@@ -2,9 +2,9 @@
 
 import { cn } from "@/lib/utils";
 import type { Section } from "@/app/dashboard/page";
-import { Bell, Search, Calendar, ArrowRight, ArrowRightLeft, X } from "lucide-react";
+import { Bell, Search, Calendar, ArrowRight, ArrowRightLeft, X, LogOut, Mail, UserRound } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { useSession } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface HeaderProps {
@@ -26,6 +26,8 @@ const sectionTitles: Record<Section, string> = {
   transactions: "Transactions",
   loans: "Loans",
   budgets: "Budgets",
+  trips: "Trips",
+  analysis: "Analysis",
   reports: "Reports",
   settings: "Settings",
 };
@@ -36,8 +38,38 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
   const [nearDueLoans, setNearDueLoans] = useState<NearDueLoan[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
+  const accountRef = useRef<HTMLDivElement>(null);
+  const accountCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [seencount, setSeencount] = useState(false);
+  const [isAccountOpen, setIsAccountOpen] = useState(false);
+  const [isAccountClosing, setIsAccountClosing] = useState(false);
   const { data: session, status } = useSession();
+
+  const closeAccountMenu = () => {
+    if (!isAccountOpen || isAccountClosing) return;
+
+    setIsAccountClosing(true);
+    accountCloseTimerRef.current = setTimeout(() => {
+      setIsAccountOpen(false);
+      setIsAccountClosing(false);
+      accountCloseTimerRef.current = null;
+    }, 520);
+  };
+
+  const toggleAccountMenu = () => {
+    if (isAccountOpen) {
+      closeAccountMenu();
+      return;
+    }
+
+    if (accountCloseTimerRef.current) {
+      clearTimeout(accountCloseTimerRef.current);
+      accountCloseTimerRef.current = null;
+    }
+
+    setIsAccountClosing(false);
+    setIsAccountOpen(true);
+  };
 
 
   useEffect(() => {
@@ -55,16 +87,30 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
 
 
 
-  // Close dropdown when clicking outside
+  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
         setIsNotificationOpen(false);
       }
+
+      if (accountRef.current && !accountRef.current.contains(event.target as Node)) {
+        closeAccountMenu();
+      }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isAccountOpen, isAccountClosing]);
+
+  useEffect(() => {
+    return () => {
+      if (accountCloseTimerRef.current) {
+        clearTimeout(accountCloseTimerRef.current);
+      }
+    };
   }, []);
 
   const fetchNearDueLoans = async () => {
@@ -238,16 +284,74 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
           )}
         </div>
 
-        {/* User avatar */}
-        {status === "loading" ? (
-          <Skeleton className="w-9 h-9 rounded-lg" />
-        ) : (
-          <button className="w-9 h-9 rounded-lg overflow-hidden bg-secondary ring-2 ring-transparent hover:ring-accent/50 transition-all duration-200">
-            <div className="w-full h-full bg-gradient-to-br from-accent/80 to-chart-1 flex items-center justify-center text-xs font-semibold text-accent-foreground">
-              {session?.user?.name?.charAt(0) || "PT"}
+        {/* User account */}
+        <div className="relative" ref={accountRef}>
+          {status === "loading" ? (
+            <Skeleton className="w-9 h-9 rounded-lg" />
+          ) : (
+            <button
+              type="button"
+              aria-label="Open account menu"
+              aria-expanded={isAccountOpen}
+              onClick={toggleAccountMenu}
+              className="w-9 h-9 cursor-pointer rounded-lg overflow-hidden bg-secondary ring-2 ring-transparent hover:ring-accent/50 transition-all duration-200"
+            >
+              <div className="w-full h-full bg-gradient-to-br from-accent/80 to-chart-1 flex items-center justify-center text-xs font-semibold text-accent-foreground">
+                {session?.user?.name?.charAt(0) || "PT"}
+              </div>
+            </button>
+          )}
+
+          {isAccountOpen && (
+            <div
+              className={cn(
+                "absolute right-0 top-12 w-72 rounded-xl border border-white/15 bg-white/[0.07] shadow-[0_24px_80px_-28px_rgba(0,0,0,0.85)] backdrop-blur-2xl overflow-hidden z-30 ring-1 ring-white/10",
+                isAccountClosing ? "account-menu-slide-out" : "account-menu-slide"
+              )}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-white/[0.04]">
+                <div className="flex items-center gap-2">
+                  <UserRound className="w-4 h-4 text-yellow-500" />
+                  <h3 className="text-sm font-semibold text-foreground">Profile</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeAccountMenu}
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  aria-label="Close account menu"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="px-4 py-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-11 w-11 shrink-0 rounded-xl bg-gradient-to-br from-accent/80 to-chart-1 flex items-center justify-center text-sm font-semibold text-accent-foreground">
+                    {session?.user?.name?.charAt(0) || "PT"}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {session?.user?.name || "PaisaTracker User"}
+                    </p>
+                    <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <Mail className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{session?.user?.email || "No email available"}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => signOut({ callbackUrl: "/signIn" })}
+                  className="flex w-full items-center justify-between rounded-lg border border-white/10 bg-white/[0.06] px-3 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-destructive/15 hover:text-destructive"
+                >
+                  <span>Logout</span>
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
             </div>
-          </button>
-        )}
+          )}
+        </div>
       </div>
     </header>
   );

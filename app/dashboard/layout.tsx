@@ -8,7 +8,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen min-w-0 bg-background">
+    <div className="min-h-screen  min-w-0 bg-background">
       <QueryProvider>
         {children}
       </QueryProvider>

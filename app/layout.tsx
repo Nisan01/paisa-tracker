@@ -28,12 +28,13 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} dark`}
     >
       <body className="bg-black text-white ">
         <Providers>
           {children}
-          <ToastContainer />
+          <ToastContainer position="bottom-right" />
         </Providers>
       </body>
     </html>

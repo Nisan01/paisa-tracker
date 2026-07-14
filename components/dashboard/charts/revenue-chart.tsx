@@ -60,10 +60,10 @@ export function RevenueChart() {
         </div>
       </div>
 
-      <ChartContainer className="h-[280px]">
+      <ChartContainer className="h-[280px] min-h-[280px] min-w-0">
        <ResponsiveContainer
       width="100%"
-      height="100%"
+      height={280}
       minHeight={200}
       initialDimension={{ width: 400, height: 200 }}
     >

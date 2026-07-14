@@ -64,7 +64,6 @@ export const getLoans = async (userId: string, nearDueDays?: number) => {
         and(
           isNotNull(loans.dueDate),
           or(eq(loans.status, "active"), eq(loans.status, "pending")),
-          sql`${loans.dueDate} >= ${today.toISOString()}`,
           sql`${loans.dueDate} <= ${futureDate.toISOString()}`
         )
       );

@@ -277,8 +277,6 @@ export function OverviewSection({ onNavigate }: Props) {
       color: colorList[Math.floor(Math.random() * colorList.length)],
     })) || [];
 
-  console.log(budgetData);
-
   if (error) {
     return <div>Failed to load overview data.</div>;
   }
@@ -288,7 +286,7 @@ export function OverviewSection({ onNavigate }: Props) {
   if (status === "loading" || isLoadingData) {
     return (
       <div className="space-y-6">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <div
               key={i}
@@ -344,51 +342,93 @@ export function OverviewSection({ onNavigate }: Props) {
   // MAIN UI
   // ======================
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 ">
 
-      {/* METRICS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <MetricCard
-          title="Total Balance"
-          value={formatCurrency(totalBalance)}
-          change={`${balanceChange.toFixed(1)}%`}
-          changeType={balanceChange >= 0 ? "positive" : "negative"}
-          icon={Wallet}
-          delay={0}
-        />
+     
 
-        <MetricCard
-          title="Total Income"
-          value={formatCurrency(income)}
-          change={`${incomeChange.toFixed(1)}%`}
-          changeType={incomeChange >= 0 ? "positive" : "negative"}
-          icon={TrendingUp}
-          delay={1}
-        />
+       <div className="grid grid-cols-2  md:grid-cols-4 gap-4">
 
-        <MetricCard
-          title="Total Expenses"
-          value={formatCurrency(expenses)}
-          change={`${expenseChange.toFixed(1)}%`}
-          changeType={expenseChange <= 0 ? "positive" : "negative"}
-          icon={TrendingDown}
-          delay={2}
-        />
+        <div className="group relative bg-mist-300/10 border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+        style={
+          { animationDelay: `${0 * 100}ms`, animationFillMode: "both" }
+        }>
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden" /> Balance</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                {formatCurrency(totalBalance)}
+              </p>
+         
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-yellow-500" />
+            </div>
+          </div>
+        </div>
 
-        <MetricCard
-          title="Savings Rate"
-          value={`${savingsRate}%`}
-          change={`${savingsRateChange.toFixed(1)}%`}
-          changeType={savingsRateChange >= 0 ? "positive" : "negative"}
-          icon={PiggyBank}
-          delay={3}
-        />
+        <div className="group relative bg-purple-500/15 border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+         style={
+          { animationDelay: `${1 * 100}ms`, animationFillMode: "both" }
+        }>
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="md:text-2xl text-sm text-muted-foreground font-medium mb-2">Savings <br className="md:hidden inline" /> Rate</p>
+              <p className="text-lg font-bold text-foreground tracking-tight">$ {savingsRate}%</p>
+         
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <PiggyBank className="w-5 h-5 text-green-500" />
+            </div>
+          </div>
+        </div>
+
+          <div className="group relative bg-green-500/15 border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+        style={
+          { animationDelay: `${0 * 100}ms`, animationFillMode: "both" }
+        }>
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden" /> Income</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                {formatCurrency(income)}
+              </p>
+         
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-yellow-500" />
+            </div>
+          </div>
+        </div>
+
+          <div className="group relative bg-red-500/15 border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+        style={
+          { animationDelay: `${0 * 100}ms`, animationFillMode: "both" }
+        }>
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden" /> Expenses</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                {formatCurrency(expenses)}
+              </p>
+         
+            </div>
+            <div className="w-10 h-10 rounded-lg bg-secondary flex items-center justify-center">
+              <Wallet className="w-5 h-5 text-yellow-500" />
+            </div>
+          </div>
+        </div>
+
+
       </div>
 
       {/* CHARTS */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <IncomeExpenseChart data={chartData} />
-        <ExpenseCategories data={budgetData} />
+        <IncomeExpenseChart data={chartData} onNavigateSection={onNavigate} />
+        <ExpenseCategories data={budgetData} onNavigateSection={onNavigate} />
       </div>
 
       {/* BOTTOM SECTION */}

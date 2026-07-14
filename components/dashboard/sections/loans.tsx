@@ -398,69 +398,82 @@ export function LoansSection({
     <div
       className={`space-y-6 ${isSaving ? "pointer-events-none opacity-50" : ""}`}
     >
-      {/* Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-border bg-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-accent/60 flex items-center justify-center">
-                <ArrowRight className="w-5 h-5 text-green-500" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Lent</p>
-                <p className="text-xl font-bold text-green-500">
-                  Rs {totalLent.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+     
 
-        <Card className="border-border bg-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                <ArrowRightLeft className="w-5 h-5 text-destructive" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Borrowed</p>
-                <p className="text-xl font-bold text-destructive">
-                  Rs {totalBorrowed.toLocaleString()}
-                </p>
-              </div>
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    
+        <div
+          className="hidden md:block group relative bg-green-500/15 border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${1 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Loans <br className="inline md:hidden"/> Paid</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                   &nbsp;&nbsp;{totalPaidCount}
+              </p>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-border bg-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
                 <CheckCircle2 className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Loans Paid</p>
-                <p className="text-xl font-bold">{totalPaidCount}</p>
-              </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+        <div
+          className="group relative bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${1 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden"/> Lent</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                  Rs &nbsp;&nbsp;{totalLent.toLocaleString()}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                <ArrowRight className="w-5 h-5 text-green-500" />
+            </div>
+          </div>
+        </div>
+
+        <div
+          className="group relative bg-card border border-border rounded-xl p-5 hover:border-accent/50 transition-all duration-500 overflow-hidden animate-in fade-in slide-in-from-bottom-4"
+          style={{ animationDelay: `${2 * 100}ms`, animationFillMode: "both" }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="relative flex items-start justify-between">
+            <div>
+              <p className="text-sm text-muted-foreground font-medium mb-2">Total <br className="inline md:hidden"/> Borrowed</p>
+              <p className="text-lg md:text-2xl font-bold text-foreground tracking-tight">
+                  Rs &nbsp;&nbsp;{totalBorrowed.toLocaleString()}
+              </p>
+            </div>
+            <div className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center">
+                <ArrowRightLeft className="w-5 h-5 text-destructive" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="relative">
+   
+
+     
+
+   
+      <div className="flex  sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center w-full gap-3 flex-wrap">
+          <div className="relative w-full md:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               placeholder="Search loans..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-[280px] bg-secondary border-border"
+              className="pl-10 md:w-[545px] w-full bg-secondary border-border"
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center w-full  mt-2 gap-2">
             {(["all", "lent", "borrowed"] as const).map((type) => (
               <Button
                 key={type}
@@ -471,16 +484,18 @@ export function LoansSection({
                 {type.charAt(0).toUpperCase() + type.slice(1)}
               </Button>
             ))}
+
+            <Button
+          className="bg-primary/90 px-6 cursor-pointer ml-auto hover:bg-primary text-primary-foreground"
+          onClick={() => setIsAddDialogOpen(true)}
+        >
+          <Plus className="w-4 h-4 md:mr-2" />
+          Add <span className="hidden md:inline">Loan</span>
+        </Button>
           </div>
         </div>
 
-        <Button
-          className="bg-primary/90 px-6 cursor-pointer hover:bg-primary text-primary-foreground"
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          <Plus className="w-4 h-4 mr-2" />
-          Add Loan
-        </Button>
+        
       </div>
 
       {/* Loading */}
@@ -540,16 +555,24 @@ export function LoansSection({
       )}
 
       {!loading && loanList.length === 0 && (
-        <div className="flex items-center text-gray-300 justify-center h-[60vh]">
-          <h2 className="text-sm">No loans found</h2>
+        <div className="flex flex-col items-center justify-center py-16 px-4">
+          <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+            <DollarSign className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium text-foreground mb-1">No loans yet</p>
+          <p className="text-sm text-muted-foreground mb-4">Add your first loan to start tracking</p>
+          <Button onClick={() => setIsAddDialogOpen(true)} className="cursor-pointer">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Loan
+          </Button>
         </div>
       )}
 
-      {/* Table */}
+  
       {!loading && loanList.length > 0 && (
-        <Card className="border-border bg-card overflow-hidden">
+        <Card className="border-border min-h-[49vh] md:min-h-[60vh] bg-card overflow-hidden ">
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto min-h-[49vh] scrollbar-none">
               <table className="w-full">
                 <thead className="bg-secondary/50">
                   <tr>

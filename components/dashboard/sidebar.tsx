@@ -48,8 +48,9 @@ export function Sidebar({
   onCollapsedChange,
 }: SidebarProps) {
   return (
-    <aside
-      className={`fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border flex flex-col transition-all duration-300 ease-out ${collapsed ? "w-16" : "w-64"
+<>
+<aside
+      className={`fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border hidden md:flex flex-col transition-all duration-300 ease-out ${collapsed ? "w-16" : "w-64"
         }`}
 
     >
@@ -156,5 +157,44 @@ export function Sidebar({
         </button>
       </div>
     </aside>
+
+    
+<nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-sidebar-border bg-sidebar md:hidden">
+      <div className="flex items-center gap-1 overflow-x-auto px-2 py-2">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = activeSection === item.id;
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => onSectionChange(item.id)}
+              className={cn(
+                "flex min-w-[72px]  flex-col cursor-pointer items-center justify-center gap-1 rounded-lg px-2 py-2 text-[11px] font-medium transition-colors",
+                isActive
+                  ? "text-yellow-500"
+                  : "text-muted-foreground hover:text-sidebar-foreground"
+              )}
+              aria-label={item.label}
+            >
+              <Icon
+                className={cn(
+                  "h-5 w-5 ",
+                  isActive ? "text-yellow-500" : "text-muted-foreground"
+                )}
+              />
+              <span className="whitespace-nowrap">
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </nav>
+
+    </>  
+  
+
+    
   );
 }

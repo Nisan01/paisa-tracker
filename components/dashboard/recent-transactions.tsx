@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingUp, TrendingDown, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { TrendingUp, TrendingDown, ArrowRight, Wallet } from "lucide-react";
 import type { Section } from "@/app/dashboard/page";
 interface Transaction {
   id: string;
@@ -38,8 +39,16 @@ export function RecentTransactions({ transactions, onNavigateSection }: RecentTr
       </CardHeader>
 
       {transactions.length === 0 ? (
-        <div className="flex-1 flex items-center justify-center h-[33vh]">
-          <p className="text-sm text-muted-foreground">No transactions available</p>
+        <div className="flex-1 flex flex-col items-center justify-center h-[33vh]">
+          <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+            <Wallet className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium text-foreground mb-1">No transactions yet</p>
+          <p className="text-sm text-muted-foreground mb-4">Add your first transaction to start tracking</p>
+          <Button size="sm" onClick={() => onNavigateSection("transactions")}
+          >
+            Add Transaction
+          </Button>
         </div>) : (
 
         <CardContent className="space-y-3">

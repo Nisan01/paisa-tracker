@@ -89,7 +89,7 @@ export default function Dashboard() {
 
   return (
 
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen    bg-background">
 
       <Sidebar
 
@@ -105,18 +105,14 @@ export default function Dashboard() {
 
       <div
         className={cn(
-          "flex-1 min-w-0 flex flex-col transition-[padding-left] duration-300 ease-out",
-
+          "flex-1 min-w-0  flex flex-col transition-[padding-left] duration-300 ease-out",
+          sidebarCollapsed ? "md:pl-16" : "md:pl-64"
         )}
-
-        style={{
-          paddingLeft: sidebarCollapsed ? "4rem" : "16rem",
-        }}
       >
 
         <Header activeSection={activeSection} refreshLoans={refreshLoans} />
 
-        <main className="flex-1 min-w-0 overflow-auto p-6">        <div
+        <main className="flex-1 min-w-0 overflow-auto  p-6 pb-24 md:pb-6">        <div
 
           key={activeSection}
 

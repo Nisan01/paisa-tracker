@@ -17,13 +17,14 @@ import {
 
   ResponsiveContainer,
 
-  Legend,
-
 } from "recharts";
 
 
 import { useState, useEffect } from "react";
-import { useContainerWidth } from "./useContainerWidth";
+import { ChartContainer } from "@/components/ui/chart";
+import { Button } from "@/components/ui/button";
+import type { Section } from "@/app/dashboard/page";
+import { TrendingUp } from "lucide-react";
 
 
 
@@ -40,15 +41,12 @@ interface TrendData {
 
 
 interface IncomeExpenseChartProps {
-
   data: TrendData[];
-
+  onNavigateSection?: (section: Section) => void;
 }
 
 
-export function IncomeExpenseChart({ data }: IncomeExpenseChartProps) {
-  const { ref, width } = useContainerWidth();
-
+export function IncomeExpenseChart({ data, onNavigateSection }: IncomeExpenseChartProps) {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
@@ -58,7 +56,6 @@ export function IncomeExpenseChart({ data }: IncomeExpenseChartProps) {
   }, []);
 
   const hasData = data.some(d => d.income > 0 || d.expense > 0);
-  console.log(hasData)
 
   return (
 
@@ -121,23 +118,31 @@ export function IncomeExpenseChart({ data }: IncomeExpenseChartProps) {
 
 
       {!hasData ? (
-
-        <div className="flex-1 flex items-center justify-center">
-
-          <p className="text-sm text-muted-foreground">
-
-            No data available
-
-          </p>
-
+        <div className="flex-1 flex flex-col items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-muted/50 flex items-center justify-center mb-4">
+            <TrendingUp className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <p className="text-lg font-medium text-foreground mb-1">No transactions yet</p>
+          <p className="text-sm text-muted-foreground mb-4">Add your first transaction to start tracking</p>
+          {onNavigateSection && (
+            <Button size="sm" onClick={() => onNavigateSection("transactions")}>
+              Add Transaction
+            </Button>
+          )}
         </div>
-
       ) : (
-        <div
-          className={`h-[280px] w-full transition-opacity duration-700 ${isLoaded ? "opacity-100" : "opacity-0"
-            }`}
+        <ChartContainer
+          className={`h-[280px] min-h-[280px] w-full min-w-0 transition-opacity duration-700 ${
+            isLoaded ? "opacity-100" : "opacity-0"
+          }`}
         >
-          <ResponsiveContainer width="100%" height="100%" minWidth={100}>
+          <ResponsiveContainer
+            width="100%"
+            height={280}
+            minWidth={100}
+            minHeight={200}
+            initialDimension={{ width: 400, height: 280 }}
+          >
             <AreaChart data={data} margin={{ top: 10, right: 12, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="expenseGradient" x1="0" y1="0" x2="0" y2="1">
@@ -195,10 +200,7 @@ export function IncomeExpenseChart({ data }: IncomeExpenseChartProps) {
             </AreaChart>
 
           </ResponsiveContainer>
-
-
-
-        </div>
+        </ChartContainer>
 
 
       )}
