@@ -210,7 +210,7 @@ export function TeamSection() {
                 }}
                 labelStyle={{ color: "oklch(0.95 0 0)", fontWeight: 600 }}
                 itemStyle={{ color: "oklch(0.65 0 0)" }}
-                formatter={(value: number) => [`$${value}k`, ""]}
+                formatter={(value) => [`$${Number(value || 0)}k`, ""]}
               />
               <Bar dataKey="quota" fill="oklch(0.65 0 0 / 0.2)" radius={[4, 4, 0, 0]} />
               <Bar dataKey="revenue" fill="oklch(0.7 0.18 220)" radius={[4, 4, 0, 0]} />

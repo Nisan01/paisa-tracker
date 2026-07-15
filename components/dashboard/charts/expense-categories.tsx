@@ -82,7 +82,10 @@ export function ExpenseCategories({ data, onNavigateSection }: ExpenseCategories
                     borderRadius: "8px",
                     fontSize: "12px",
                   }}
-                  formatter={(value: number) => [`Rs ${value.toLocaleString()}`, ""]}
+                  formatter={(value) => [
+                    `Rs ${Number(value || 0).toLocaleString()}`,
+                    "",
+                  ]}
                 />
               </PieChart>
             </ResponsiveContainer>

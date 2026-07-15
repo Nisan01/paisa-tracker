@@ -49,7 +49,7 @@ export const getLoans = async (userId: string, nearDueDays?: number) => {
   try {
     const db = getDb();
 
-    let conditions = [eq(loans.userId, userId)];
+    let whereClause = eq(loans.userId, userId);
 
     // If nearDueDays is provided, filter for loans due within that many days
     if (nearDueDays) {
@@ -59,20 +59,18 @@ export const getLoans = async (userId: string, nearDueDays?: number) => {
       futureDate.setDate(futureDate.getDate() + nearDueDays);
       futureDate.setHours(23, 59, 59, 999);
 
-      // Use SQL fragment for proper date comparison - include active and pending
-      conditions.push(
-        and(
-          isNotNull(loans.dueDate),
-          or(eq(loans.status, "active"), eq(loans.status, "pending")),
-          sql`${loans.dueDate} <= ${futureDate.toISOString()}`
-        )
-      );
+      whereClause = and(
+        eq(loans.userId, userId),
+        isNotNull(loans.dueDate),
+        or(eq(loans.status, "active"), eq(loans.status, "pending")),
+        sql`${loans.dueDate} <= ${futureDate.toISOString()}`
+      )!;
     }
 
     const userLoans = await db
       .select()
       .from(loans)
-      .where(and(...conditions))
+      .where(whereClause)
       .orderBy(desc(loans.createdAt));
 
     return {

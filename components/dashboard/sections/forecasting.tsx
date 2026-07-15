@@ -260,7 +260,10 @@ export function ForecastingSection() {
                     borderRadius: "8px",
                     color: "oklch(0.95 0 0)",
                   }}
-                  formatter={(value: number) => [`$${value.toLocaleString()}`, ""]}
+                  formatter={(value) => [
+                    `$${Number(value || 0).toLocaleString()}`,
+                    "",
+                  ]}
                 />
                 <Area
                   type="monotone"
@@ -314,7 +317,10 @@ export function ForecastingSection() {
                       borderRadius: "8px",
                       color: "oklch(0.95 0 0)",
                     }}
-                    formatter={(value: number) => [`$${(value / 1000000).toFixed(2)}M`, ""]}
+                    formatter={(value) => [
+                      `$${(Number(value || 0) / 1000000).toFixed(2)}M`,
+                      "",
+                    ]}
                   />
                   <Legend
                     wrapperStyle={{ fontSize: "12px" }}

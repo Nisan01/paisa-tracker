@@ -51,11 +51,11 @@ export default function Dashboard() {
 
       case "accounts":
 
-        return <AccountsSection onNavigate={goToSection} />;
+        return <AccountsSection />;
 
       case "transactions":
 
-        return <TransactionsSection onNavigate={goToSection} />;
+        return <TransactionsSection />;
 
       case "loans":
 
@@ -80,7 +80,7 @@ export default function Dashboard() {
 
       default:
 
-        return <OverviewSection />;
+        return <OverviewSection onNavigate={goToSection} />;
 
     }
 

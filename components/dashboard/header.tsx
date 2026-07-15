@@ -28,7 +28,6 @@ const sectionTitles: Record<Section, string> = {
   budgets: "Budgets",
   trips: "Trips",
   analysis: "Analysis",
-  reports: "Reports",
   settings: "Settings",
 };
 

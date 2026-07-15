@@ -178,7 +178,10 @@ export function IncomeExpenseChart({ data, onNavigateSection }: IncomeExpenseCha
                 }}
                 labelStyle={{ color: "oklch(0.93 0 0)", fontWeight: 600 }}
                 itemStyle={{ color: "oklch(0.55 0 0)" }}
-                formatter={(value: number) => [`$${(value / 1000).toFixed(0)}k`, ""]}
+                formatter={(value) => [
+                  `$${(Number(value || 0) / 1000).toFixed(0)}k`,
+                  "",
+                ]}
               />
               <Area
                 type="monotone"

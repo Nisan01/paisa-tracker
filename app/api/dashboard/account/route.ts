@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       userId,
       name,
       type,
-      balance,
+      balance: balance === undefined ? undefined : balance.toString(),
       isDefault,
     });
 

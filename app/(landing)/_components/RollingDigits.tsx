@@ -2,26 +2,29 @@
 
 import { useEffect, useRef } from "react";
 import "@/app/(landing)/_components/styles/odometer.css";
+import type Odometer from "odometer";
 
 export default function Counter() {
   const elRef = useRef<HTMLDivElement>(null);
-  const odRef = useRef<any>(null);
+  const odRef = useRef<Odometer | null>(null);
 
   useEffect(() => {
-    if (!elRef.current) return;
+    const el = elRef.current;
+    if (!el) return;
 
     import("odometer").then((mod) => {
       const Odometer = mod.default;
 
       if (!odRef.current) {
         odRef.current = new Odometer({
-          el: elRef.current,
+          el,
           value: 100000,
           format: "(,ddd)",
           duration: 300,
         });
       }
 
+      const odometer = odRef.current;
       let value = 100000;
 
       const animate = () => {
@@ -36,7 +39,7 @@ export default function Counter() {
 
         value -= Math.ceil(value / 20); // smooth easing
 
-        odRef.current.update(value);
+        odometer.update(value);
 
         setTimeout(animate, delay);
       };

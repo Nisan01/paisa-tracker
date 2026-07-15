@@ -54,6 +54,36 @@ interface Loan {
   createdAt: string;
 }
 
+interface ApiLoan {
+  id: string;
+  personName: string;
+  phone?: string | null;
+  totalAmount: string;
+  remainingAmount: string;
+  dueDate?: string | null;
+  type: "lent" | "borrowed";
+  status: "active" | "pending" | "paid";
+  notes?: string | null;
+  createdAt?: string | null;
+}
+
+interface LoanPayload {
+  userId?: string;
+  personName: string;
+  phone?: string;
+  type: "lent" | "borrowed";
+  totalAmount: number;
+  remainingAmount?: number;
+  dueDate?: string;
+  status?: "active" | "pending" | "paid";
+  notes?: string;
+}
+
+interface LoanPaymentPayload {
+  loanId: string;
+  amount: number;
+}
+
 export function LoansSection({
   onLoanChange,
   refreshTrigger,
@@ -99,7 +129,7 @@ export function LoansSection({
   const queryClient = useQueryClient();
 
   // ---------------- FETCH ----------------
-  const fetchLoans = async () => {
+  const fetchLoans = async (): Promise<Loan[]> => {
     const res = await fetch(
       `/api/dashboard/loan?userId=${session?.user?.id}`
     );
@@ -107,7 +137,7 @@ export function LoansSection({
 
     const data = await res.json();
 
-    return (data.loans ?? []).map((l: any) => ({
+    return ((data.loans ?? []) as ApiLoan[]).map((l) => ({
       id: l.id,
       person: l.personName,
       phone: l.phone || "",
@@ -160,7 +190,7 @@ export function LoansSection({
 
   // ---------------- MUTATIONS ----------------
   const addLoanMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: LoanPayload) => {
       const res = await fetch("/api/dashboard/loan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -179,7 +209,7 @@ export function LoansSection({
   });
 
   const updateLoanMutation = useMutation({
-    mutationFn: async ({ id, payload }: any) => {
+    mutationFn: async ({ id, payload }: { id: string; payload: LoanPayload }) => {
       const res = await fetch(`/api/dashboard/loan?id=${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -198,7 +228,7 @@ export function LoansSection({
   });
 
   const paymentMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: LoanPaymentPayload) => {
       const res = await fetch(`/api/dashboard/loan`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

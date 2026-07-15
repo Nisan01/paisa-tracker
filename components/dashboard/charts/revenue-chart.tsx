@@ -161,8 +161,8 @@ export function RevenueChart() {
               itemStyle={{
                 color: "oklch(0.55 0 0)",
               }}
-              formatter={(value: number) => [
-                `$${(value / 1000).toFixed(0)}k`,
+              formatter={(value) => [
+                `$${(Number(value || 0) / 1000).toFixed(0)}k`,
                 "",
               ]}
             />

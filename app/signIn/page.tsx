@@ -61,6 +61,7 @@ export default function SignIn() {
 
               <form method="post" action="/api/auth/signin/google" className="space-y-4">
                 <input name="csrfToken" type="hidden" value={csrfToken} />
+                <input name="callbackUrl" type="hidden" value="/dashboard" />
                 <button
                   className="group flex cursor-pointer w-full items-center justify-between rounded-2xl border border-white/15 bg-white px-4 py-3 text-sm font-semibold text-zinc-900 shadow-lg transition hover:-translate-y-0.5 hover:shadow-[0_18px_40px_-16px_rgba(255,255,255,0.5)]"
                   type="submit"

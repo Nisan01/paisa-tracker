@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { motion, useScroll, useTransform, type MotionValue } from "framer-motion";
+import { motion, useScroll, useTransform, type MotionValue, type Variants } from "framer-motion";
 import { Wallet, TrendingUp, Bell, FileText, Repeat, BarChart3 } from "lucide-react";
 
 const p1 = "We're building a complete expenditure tracker where every transaction finds its place  where spending becomes visible, loans stay accountable, and budgets feel like clarity, not control.".split(" ");
@@ -61,7 +61,7 @@ const featureCards = [
   }
 ];
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 30, scale: 0.95 },
   visible: (i: number) => ({
     opacity: 1,
@@ -70,7 +70,7 @@ const cardVariants = {
     transition: {
       duration: 0.6,
       delay: i * 0.1,
-      ease: [0.22, 1, 0.36, 1]
+      ease: [0.22, 1, 0.36, 1] as const
     }
   })
 };

@@ -127,7 +127,7 @@ export async function PUT(req: Request) {
       totalAmount,
       remainingAmount: remainingAmount === undefined ? undefined : remainingAmount,
       dueDate: dueDate ? new Date(dueDate) : undefined,
-      status,
+      status: status || "active",
       notes,
     });
 

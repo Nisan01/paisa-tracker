@@ -1,0 +1,73 @@
+name: Vercel-Deployment-pipeline
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  lintTest:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository         
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm' # Caches dependencies to make future runs faster
+
+      - name: Install dependencies
+        run: |
+          echo "Installing dependencies..."
+          npm ci # Using 'npm ci' is cleaner for automated environments than 'npm install'
+
+      - name: Run Lint
+        run: |
+          echo "Running Lint..."
+          npm run lint
+        env:
+          CI: true   
+
+  securityCheck:
+    name: Security Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository         
+        uses: actions/checkout@v4
+
+      - name: Check for Security          
+        run: |
+          echo "Running Security Checks ..."
+          sleep 2s
+          echo "Running Security checks 1.."
+          sleep 2s
+          echo "Running Security checks 2.."
+          sleep 2s
+          echo "Running Security checks 3.."  
+          # TIP: In the future, replace these sleeps with a real command like: npm audit
+
+  deploy:
+    name: Deploy to Vercel
+    runs-on: ubuntu-latest
+    needs: [lintTest, securityCheck]
+    steps:
+      - name: Clone repository         
+        uses: actions/checkout@v4
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Pull Vercel Environment Info
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Production Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy Prebuilt Package to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

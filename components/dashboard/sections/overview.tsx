@@ -19,9 +19,10 @@ import { useSession } from "next-auth/react";
 import { LoanStatus } from "@/components/dashboard/loan-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
+import type { Section } from "@/app/dashboard/page";
 
 type Props = {
-  onNavigate: (section: string) => void;
+  onNavigate: (section: Section) => void;
 };
 
 interface OverviewData {

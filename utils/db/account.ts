@@ -1,6 +1,6 @@
 import { getDb } from "@/index";
 import { accounts, transactions } from "./schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 export const addAccount = async (accountData: {
   userId: string;
@@ -102,12 +102,16 @@ export const deleteAccount = async (userId: string, accountId: string) => {
 
     await db
       .delete(transactions)
-      .where(eq(transactions.accountId, accountId));
+      .where(
+        and(
+          eq(transactions.userId, userId),
+          eq(transactions.accountId, accountId)
+        )
+      );
 
     await db
       .delete(accounts)
-      .where(eq(accounts.userId, userId))
-      .where(eq(accounts.id, accountId));
+      .where(and(eq(accounts.userId, userId), eq(accounts.id, accountId)));
 
     return {
       success: true,

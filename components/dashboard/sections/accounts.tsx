@@ -33,8 +33,16 @@ type Account = {
   id: string;
   name: string;
   type: string;
-  balance: number;
+  balance: number | string;
   isDefault?: boolean;
+};
+
+type CreateAccountPayload = {
+  userId?: string;
+  name: string;
+  type: string;
+  balance: number;
+  isDefault: boolean;
 };
 
 const accountTypeConfig: Record<string, {
@@ -71,7 +79,7 @@ export function AccountsSection() {
   const { data: session } = useSession();
   const queryClient = useQueryClient();
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = async (): Promise<{ accounts: Account[] }> => {
 
     const res = await fetch("/api/dashboard/account?userId=" + session?.user?.id);
 
@@ -95,7 +103,7 @@ export function AccountsSection() {
 
     staleTime: 1000 * 60 * 5,
   });
-  const accountList = data?.accounts || [];
+  const accountList: Account[] = data?.accounts || [];
   const isAccountsAvailable = accountList.length > 0;
 
 
@@ -111,7 +119,7 @@ export function AccountsSection() {
   );
   
 
-  const createAccount = async (payload: any) => {
+  const createAccount = async (payload: CreateAccountPayload) => {
     const res = await fetch("/api/dashboard/account", {
       method: "POST",
       headers: {

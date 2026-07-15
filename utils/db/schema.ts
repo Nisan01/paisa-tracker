@@ -6,6 +6,8 @@ import {
   boolean,
   pgEnum,
   numeric,
+  integer,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 import { relations } from "drizzle-orm";
@@ -33,6 +35,18 @@ export const loanStatusEnum = pgEnum("loan_status", [
   "active",
   "pending",
   "paid",
+]);
+
+export const loanReminderTypeEnum = pgEnum("loan_reminder_type", [
+  "7_days",
+  "3_days",
+  "1_day",
+  "due_today",
+]);
+
+export const reminderStatusEnum = pgEnum("reminder_status", [
+  "sent",
+  "failed",
 ]);
 
 // ============================================================
@@ -201,6 +215,45 @@ export const loanPayments = pgTable("loan_payments", {
 });
 
 // ============================================================
+// LOAN REMINDER LOGS
+// ============================================================
+
+export const loanReminderLogs = pgTable(
+  "loan_reminder_logs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+
+    userId: uuid("user_id")
+      .references(() => users.id, { onDelete: "cascade" })
+      .notNull(),
+
+    loanId: uuid("loan_id")
+      .references(() => loans.id, { onDelete: "cascade" })
+      .notNull(),
+
+    reminderType: loanReminderTypeEnum("reminder_type").notNull(),
+    dueDateSnapshot: timestamp("due_date_snapshot", { withTimezone: true }).notNull(),
+    status: reminderStatusEnum("status").notNull(),
+
+    attemptCount: integer("attempt_count").notNull().default(1),
+    resendEmailId: text("resend_email_id"),
+    errorMessage: text("error_message"),
+
+    attemptedAt: timestamp("attempted_at", { withTimezone: true }).defaultNow().notNull(),
+    sentAt: timestamp("sent_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => ({
+    uniqueReminder: uniqueIndex("loan_reminder_logs_loan_type_due_unique").on(
+      table.loanId,
+      table.reminderType,
+      table.dueDateSnapshot
+    ),
+  })
+);
+
+// ============================================================
 // RELATIONS
 // ============================================================
 
@@ -209,6 +262,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   transactions: many(transactions),
   budgets: many(budgets),
   loans: many(loans),
+  loanReminderLogs: many(loanReminderLogs),
 }));
 
 export const accountsRelations = relations(accounts, ({ one, many }) => ({
@@ -262,11 +316,23 @@ export const loansRelations = relations(loans, ({ one, many }) => ({
     references: [users.id],
   }),
   payments: many(loanPayments),
+  reminderLogs: many(loanReminderLogs),
 }));
 
 export const loanPaymentsRelations = relations(loanPayments, ({ one }) => ({
   loan: one(loans, {
     fields: [loanPayments.loanId],
+    references: [loans.id],
+  }),
+}));
+
+export const loanReminderLogsRelations = relations(loanReminderLogs, ({ one }) => ({
+  user: one(users, {
+    fields: [loanReminderLogs.userId],
+    references: [users.id],
+  }),
+  loan: one(loans, {
+    fields: [loanReminderLogs.loanId],
     references: [loans.id],
   }),
 }));
