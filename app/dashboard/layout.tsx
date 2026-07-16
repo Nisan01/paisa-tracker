@@ -1,6 +1,8 @@
 import QueryProvider from "@/providers/QueryProvider/QueryProvider";
-import { Query } from "@tanstack/react-query";
+import Providers from "@/providers/SessionProvider/SessionProvider";
 import React from "react";
+
+export const dynamic = "force-dynamic";
 
 export default function DashboardLayout({
   children,
@@ -9,9 +11,11 @@ export default function DashboardLayout({
 }) {
   return (
     <div className="min-h-screen  min-w-0 bg-background">
-      <QueryProvider>
-        {children}
-      </QueryProvider>
+      <Providers>
+        <QueryProvider>
+          {children}
+        </QueryProvider>
+      </Providers>
     </div>
   );
 }

@@ -1,19 +1,7 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import Providers from "@/providers/SessionProvider/SessionProvider";
 import { ToastContainer } from "react-toastify";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "PaisaTracker",
@@ -29,13 +17,11 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} dark`}
+      className="dark"
     >
       <body className="bg-black text-white ">
-        <Providers>
-          {children}
-          <ToastContainer position="bottom-right" />
-        </Providers>
+        {children}
+        <ToastContainer position="bottom-right" />
       </body>
     </html>
   );
