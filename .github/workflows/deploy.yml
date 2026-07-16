@@ -3,19 +3,7 @@ name: Vercel-Deployment-pipeline
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
   VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-  GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-
-  NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
-
-  Groq_API_KEY: ${{ secrets.Groq_API_KEY }}
-
-  RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-
-  RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
-  CRON_SECRET: ${{ secrets.CRON_SECRET }}
+  
 
 on:
   push:
@@ -52,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Clone repository         
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Check for Security          
         run: |
@@ -69,9 +57,26 @@ jobs:
     name: Deploy to Vercel
     runs-on: ubuntu-latest
     needs: [lintTest, securityCheck]
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+      Groq_API_KEY: ${{ secrets.Groq_API_KEY }}
+
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+
+      RESEND_FROM_EMAIL: ${{ secrets.RESEND_FROM_EMAIL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+
     steps:
       - name: Clone repository         
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Install Vercel CLI
         run: npm install --global vercel@latest

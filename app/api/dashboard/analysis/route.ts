@@ -4,8 +4,6 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Groq from "groq-sdk";
 import { analysisBodySchema } from "@/app/api/dashboard/_schemas";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -29,6 +27,16 @@ export async function POST(req: Request) {
     }
 
     const { categories } = parsed.data;
+    const apiKey = process.env.GROQ_API_KEY;
+
+    if (!apiKey) {
+      return NextResponse.json(
+        { success: false, message: "GROQ_API_KEY is missing" },
+        { status: 500 }
+      );
+    }
+
+    const groq = new Groq({ apiKey });
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
@@ -48,7 +56,7 @@ export async function POST(req: Request) {
       success: true,
       analysis,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { success: false, message: "Internal Server Error" },
       { status: 500 }
