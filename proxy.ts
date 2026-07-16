@@ -3,8 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function proxy(request: NextRequest) {
   const token = await getToken({ req: request });
+  const { pathname } = request.nextUrl;
 
-  if (!token) {
+  if (pathname === "/signIn" && token) {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  if (pathname.startsWith("/dashboard") && !token) {
     const signInUrl = new URL("/signIn", request.url);
     signInUrl.searchParams.set("callbackUrl", request.nextUrl.pathname);
 
@@ -15,5 +20,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/signIn"],
 };
