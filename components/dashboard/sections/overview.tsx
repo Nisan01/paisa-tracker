@@ -1,8 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
-
-import { MetricCard } from "@/components/dashboard/metric-card";
 import { IncomeExpenseChart } from "@/components/dashboard/charts/income-expense-chart";
 import { ExpenseCategories } from "@/components/dashboard/charts/expense-categories";
 import { RecentTransactions } from "@/components/dashboard/recent-transactions";
@@ -10,8 +7,6 @@ import { BudgetProgress } from "@/components/dashboard/budget-progress";
 
 import {
   Wallet,
-  TrendingUp,
-  TrendingDown,
   PiggyBank,
 } from "lucide-react";
 
@@ -30,13 +25,33 @@ interface OverviewData {
   totalIncome: number;
   totalExpenses: number;
 
-  transactionsData: any[];
-  allTransactionsData: any[];
-  budgetsData: any[];
+  transactionsData: OverviewTransaction[];
+  allTransactionsData: OverviewTransaction[];
+  budgetsData: OverviewBudget[];
 
   balanceChangeRate: number;
-  loanData: any[];
+  loanData: unknown[];
 }
+
+type OverviewTransaction = {
+  amount?: string | number | null;
+  type?: "income" | "expense" | string;
+  category?: string | null;
+  date?: string | Date | null;
+};
+
+type OverviewBudget = {
+  category?: string | null;
+  amount?: string | number | null;
+};
+
+type Account = {
+  balance?: string | number | null;
+};
+
+type AccountsResponse = {
+  accounts?: Account[];
+};
 
 const months = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -48,23 +63,6 @@ function formatCurrency(value: number): string {
   if (value >= 100000) return `Rs. ${(value / 100000).toFixed(1)}L`;
   if (value >= 1000) return `Rs. ${(value / 1000).toFixed(1)}K`;
   return `Rs. ${value}`;
-}
-
-function convertMonth(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleString("default", { month: "short" });
-}
-
-function getLastNMonths(n: number) {
-  const months: string[] = [];
-  const now = new Date();
-
-  for (let i = n - 1; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i);
-    months.push(`${d.getFullYear()}-${d.getMonth()}`);
-  }
-
-  return months;
 }
 
 export function OverviewSection({ onNavigate }: Props) {
@@ -92,7 +90,7 @@ export function OverviewSection({ onNavigate }: Props) {
     return res.json();
   };
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = async (): Promise<AccountsResponse> => {
     const res = await fetch(
       `/api/dashboard/account?userId=${session?.user?.id}`
     );
@@ -130,27 +128,25 @@ export function OverviewSection({ onNavigate }: Props) {
   const expenses = overviewData?.totalExpenses || 0;
 
   const totalBalance = accountList.reduce(
-    (sum: number, acc: any) => sum + Number(acc.balance || 0),
+    (sum, acc) => sum + Number(acc.balance || 0),
     0
   );
 
   const savingsRate =
     income > 0 ? Math.round(((income - expenses) / income) * 100) : 0;
 
-  const balanceChange = overviewData?.balanceChangeRate || 0;
-
   // ======================
   // BUDGET TRANSFORM
   // ======================
   const transformedBudgets =
-    (overviewData?.budgetsData || []).map((budget: any) => {
+    (overviewData?.budgetsData || []).map((budget) => {
       const spent = (overviewData?.allTransactionsData || [])
         .filter(
-          (tx: any) =>
+          (tx) =>
             tx.type === "expense" &&
             tx.category?.toLowerCase() === budget.category?.toLowerCase()
         )
-        .reduce((sum: number, tx: any) => sum + Number(tx.amount || 0), 0);
+        .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
       return {
         category: budget.category,
@@ -169,13 +165,13 @@ export function OverviewSection({ onNavigate }: Props) {
 
   const getMonthTotals = (year: number, month: number) => {
     return allTransactions
-      .filter((tx: any) => {
+      .filter((tx) => {
         if (!tx.date) return false;
         const date = new Date(tx.date);
         return date.getFullYear() === year && date.getMonth() === month;
       })
       .reduce(
-        (acc: { income: number; expense: number }, tx: any) => {
+        (acc: { income: number; expense: number }, tx) => {
           const amount = Math.abs(Number(tx.amount || 0));
           if (tx.type === "income") acc.income += amount;
           if (tx.type === "expense") acc.expense += amount;
@@ -272,10 +268,10 @@ export function OverviewSection({ onNavigate }: Props) {
   ];
 
   const budgetData =
-    overviewData?.budgetsData.map((b: any) => ({
+    overviewData?.budgetsData.map((b, index) => ({
       name: b.category,
       value: Number(b.amount || 0),
-      color: colorList[Math.floor(Math.random() * colorList.length)],
+      color: colorList[index % colorList.length],
     })) || [];
 
   if (error) {

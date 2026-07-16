@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { pdf } from "@react-pdf/renderer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,6 +59,33 @@ interface Account {
   balance: string;
 }
 
+type RawTransaction = {
+  id: string;
+  description?: string | null;
+  amount?: string | number | null;
+  type: "income" | "expense";
+  category: string;
+  accountName?: string | null;
+  accountId?: string;
+  date?: string | Date | null;
+};
+
+type TransactionsResponse = {
+  success?: boolean;
+  message?: string;
+  transactions?: RawTransaction[];
+};
+
+type CreateTransactionPayload = {
+  userId: string;
+  accountId: string;
+  type: "income" | "expense";
+  amount: number;
+  description: string;
+  category: string;
+  date: string;
+};
+
 const incomeCategories = [
   "Salary",
   "Freelance",
@@ -116,13 +143,13 @@ const visibleCategories = is1520 ? 11 : 9;
       throw new Error("Failed to fetch transactions");
     }
 
-    const data = await res.json();
+    const data = (await res.json()) as TransactionsResponse;
 
     if (!data?.success) {
       throw new Error(data?.message || "Failed to fetch transactions");
     }
 
-    return (data.transactions || []).map((t: any) => ({
+    return (data.transactions || []).map((t) => ({
       id: t.id,
       description: t.description || "",
       amount: parseFloat(t.amount || "0"),
@@ -181,24 +208,13 @@ const visibleCategories = is1520 ? 11 : 9;
   });
 
   const accountList = accountsData?.accounts ?? [];
-
-
-
-  // =========================
-  // AUTO SELECT ACCOUNT
-  // =========================
-
-  useEffect(() => {
-    if (accountList.length > 0 && !newTxAccountId) {
-      setNewTxAccountId(accountList[0].id);
-    }
-  }, [accountList, newTxAccountId]);
+  const selectedNewTxAccountId = newTxAccountId || accountList[0]?.id || "";
 
   // =========================
   // CREATE TRANSACTION
   // =========================
 
-  const createTransaction = async (payload: any) => {
+  const createTransaction = async (payload: CreateTransactionPayload) => {
     const res = await fetch("/api/dashboard/transaction", {
       method: "POST",
       headers: {
@@ -262,11 +278,11 @@ const handleAddTransaction = () => {
     return;
   }
 
-  if (!newTxDescription || !newTxAmount || !newTxAccountId) return;
+  if (!newTxDescription || !newTxAmount || !selectedNewTxAccountId) return;
 
   mutation.mutate({
     userId: session.user.id, // guaranteed
-    accountId: newTxAccountId,
+    accountId: selectedNewTxAccountId,
     type: newTxType,
     amount: parseFloat(newTxAmount),
     description: newTxDescription,
@@ -337,15 +353,9 @@ const handleAddTransaction = () => {
   );
 
   const totalBalance = accountList.reduce(
-    (sum: number, acc: any) => sum + Number(acc.balance || 0),
+    (sum, acc) => sum + Number(acc.balance || 0),
     0
   );
-
- useEffect(() => {
-  if ((accountList ?? []).length > 0 && !newTxAccountId) {
-    setNewTxAccountId(accountList?.[0]?.id);
-  }
-}, [accountList, newTxAccountId]);
 
   const displayedCategories =
     selectedType === "income"
@@ -881,7 +891,7 @@ const handleAddTransaction = () => {
               </label>
 
               <Select
-                value={newTxAccountId}
+                value={selectedNewTxAccountId}
                 onValueChange={setNewTxAccountId}
               >
                 <SelectTrigger>

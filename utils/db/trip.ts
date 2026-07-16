@@ -77,7 +77,7 @@ export const updateTrip = async (tripData: {
   try {
     const db = getDb();
 
-    const updateData: any = {};
+    const updateData: Partial<typeof trips.$inferInsert> = {};
     if (tripData.name) updateData.name = tripData.name;
     if (tripData.destination) updateData.destination = tripData.destination;
     if (tripData.startDate) updateData.startDate = tripData.startDate;

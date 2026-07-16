@@ -164,7 +164,7 @@ export const updateLoan = async (loanData: {
   try {
     const db = getDb();
 
-    const updateData: Record<string, any> = {
+    const updateData: Partial<typeof loans.$inferInsert> = {
       personName: loanData.personName,
       phone: loanData.phone || null,
       type: loanData.type,

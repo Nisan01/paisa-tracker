@@ -19,6 +19,25 @@ interface Transaction {
   category: string;
 }
 
+type RawTransaction = {
+  id: string;
+  amount?: string | number | null;
+  type: "income" | "expense";
+  category?: string | null;
+};
+
+type TransactionsResponse = {
+  transactions?: RawTransaction[];
+};
+
+type AnalysisPayload = {
+  categories: Array<{ category: string; expense: number }>;
+};
+
+type AnalysisResponse = {
+  analysis?: string;
+};
+
 const categoryColors = [
   "#22c55e",
   "#3b82f6",
@@ -45,9 +64,9 @@ export function AnalysisSection({ onNavigate }: { onNavigate?: (section: Section
       throw new Error("Failed to fetch transactions");
     }
 
-    const data = await res.json();
+    const data = (await res.json()) as TransactionsResponse;
 
-    return (data.transactions || []).map((t: any) => ({
+    return (data.transactions || []).map((t) => ({
       id: t.id,
       amount: parseFloat(t.amount || "0"),
       type: t.type,
@@ -63,7 +82,7 @@ export function AnalysisSection({ onNavigate }: { onNavigate?: (section: Section
   });
 
   const analyzeMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: AnalysisPayload) => {
       const res = await fetch("/api/dashboard/analysis", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -76,7 +95,7 @@ export function AnalysisSection({ onNavigate }: { onNavigate?: (section: Section
 
       return res.json();
     },
-    onSuccess: (data: any) => {
+    onSuccess: (data: AnalysisResponse) => {
       setAnalysisText(data?.analysis || "");
       toast.success("Analysis ready");
     },

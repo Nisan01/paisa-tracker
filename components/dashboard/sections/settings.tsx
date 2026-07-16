@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,19 +34,11 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export function SettingsSection() {
   const { data: session } = useSession();
-  const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
   const [openDialogKey, setOpenDialogKey] = useState<string | null>(null);
   const queryClient = useQueryClient();
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
-
-  useEffect(() => {
-    if (session?.user) {
-      setUserName(session.user.name || "");
-      setUserEmail(session.user.email || "");
-    }
-  }, [session?.user]);
+  const userName = session?.user?.name || "";
+  const userEmail = session?.user?.email || "";
 
   const getInitials = (name: string) => {
     if (!name) return "?";

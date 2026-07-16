@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import type { Section } from "@/app/dashboard/page";
 import { Bell, Search, Calendar, ArrowRight, ArrowRightLeft, X, LogOut, Mail, UserRound } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -19,6 +19,10 @@ interface NearDueLoan {
   remainingAmount: string;
   dueDate: string | null;
 }
+
+type NearDueLoanResponse = {
+  loans?: NearDueLoan[];
+};
 
 const sectionTitles: Record<Section, string> = {
   overview: "Overview",
@@ -39,12 +43,13 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
   const notificationRef = useRef<HTMLDivElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
   const accountCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [seencount, setSeencount] = useState(false);
+  const [seenLoanRefresh, setSeenLoanRefresh] = useState(refreshLoans);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isAccountClosing, setIsAccountClosing] = useState(false);
   const { data: session, status } = useSession();
+  const userId = session?.user?.id;
 
-  const closeAccountMenu = () => {
+  const closeAccountMenu = useCallback(() => {
     if (!isAccountOpen || isAccountClosing) return;
 
     setIsAccountClosing(true);
@@ -53,7 +58,7 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
       setIsAccountClosing(false);
       accountCloseTimerRef.current = null;
     }, 520);
-  };
+  }, [isAccountClosing, isAccountOpen]);
 
   const toggleAccountMenu = () => {
     if (isAccountOpen) {
@@ -70,20 +75,38 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
     setIsAccountOpen(true);
   };
 
+  const fetchNearDueLoans = useCallback(async () => {
+    try {
+      setLoadingNotifications(true);
 
-  useEffect(() => {
-    if (status === "authenticated" && session?.user?.id) {
-      fetchNearDueLoans();
+      const res = await fetch(`/api/dashboard/loan?userId=${userId}&nearDueDays=20`);
+      const data = (await res.json()) as NearDueLoanResponse;
+
+      if (data.loans) {
+        const formatted = data.loans.map((loan) => ({
+          id: loan.id,
+          personName: loan.personName,
+          type: loan.type,
+          remainingAmount: loan.remainingAmount,
+          dueDate: loan.dueDate,
+        }));
+        setNearDueLoans(formatted);
+      }
+    } catch (err) {
+      console.error("Failed to fetch near-due loans", err);
+    } finally {
+      setLoadingNotifications(false);
     }
-  }, [status, session?.user?.id, refreshLoans]);
+  }, [userId]);
 
-  // Reset seen count when loans refresh (new loan added)
+
   useEffect(() => {
-    setSeencount(false);
-  }, [refreshLoans]);
-
-
-
+    if (status === "authenticated" && userId) {
+      queueMicrotask(() => {
+        void fetchNearDueLoans();
+      });
+    }
+  }, [status, userId, refreshLoans, fetchNearDueLoans]);
 
 
   // Close dropdowns when clicking outside
@@ -102,7 +125,7 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isAccountOpen, isAccountClosing]);
+  }, [closeAccountMenu]);
 
   useEffect(() => {
     return () => {
@@ -111,31 +134,6 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
       }
     };
   }, []);
-
-  const fetchNearDueLoans = async () => {
-    try {
-      setLoadingNotifications(true);
-      const userId = session?.user?.id;
-
-      const res = await fetch(`/api/dashboard/loan?userId=${userId}&nearDueDays=20`);
-      const data = await res.json();
-
-      if (data.loans) {
-        const formatted = data.loans.map((loan: any) => ({
-          id: loan.id,
-          personName: loan.personName,
-          type: loan.type,
-          remainingAmount: loan.remainingAmount,
-          dueDate: loan.dueDate,
-        }));
-        setNearDueLoans(formatted);
-      }
-    } catch (err) {
-      console.error("Failed to fetch near-due loans", err);
-    } finally {
-      setLoadingNotifications(false);
-    }
-  };
 
   const getDaysRemaining = (dueDate: string | null) => {
     if (!dueDate) return null;
@@ -185,10 +183,10 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
         <div className="relative " ref={notificationRef}>
           <button
             className="relative w-9 h-9 flex items-center cursor-pointer justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-mist-600 transition-all duration-200"
-            onClick={() => { setIsNotificationOpen(!isNotificationOpen); setSeencount(true); }}
+            onClick={() => { setIsNotificationOpen(!isNotificationOpen); setSeenLoanRefresh(refreshLoans); }}
           >
             <Bell className="w-5 h-5 text-yellow-500" />
-            {nearDueLoans.length > 0 && !seencount && (
+            {nearDueLoans.length > 0 && seenLoanRefresh !== refreshLoans && (
               <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full px-1">
                 {getBadgeDisplay()}
               </span>

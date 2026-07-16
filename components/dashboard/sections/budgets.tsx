@@ -49,6 +49,35 @@ interface Transaction {
   category: string;
 }
 
+type RawTransaction = {
+  id: string;
+  amount?: string | number | null;
+  type: "income" | "expense";
+  category: string;
+};
+
+type RawBudget = {
+  id: string;
+  category: string;
+  amount: string | number;
+  period: "monthly" | "weekly";
+};
+
+type TransactionsResponse = {
+  transactions?: RawTransaction[];
+};
+
+type BudgetsResponse = {
+  budgets?: RawBudget[];
+};
+
+type AddBudgetPayload = {
+  userId: string;
+  category: string;
+  amount: number;
+  period: "monthly" | "weekly";
+};
+
 export function BudgetsSection() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPeriod, setSelectedPeriod] = useState<"all" | "monthly" | "weekly">("all");
@@ -79,9 +108,9 @@ export function BudgetsSection() {
   const fetchTransactions = async (): Promise<Transaction[]> => {
     const res = await fetch(`/api/dashboard/transaction?userId=${session?.user?.id}`);
     if (!res.ok) throw new Error("Failed to fetch transactions");
-    const data = await res.json();
+    const data = (await res.json()) as TransactionsResponse;
 
-    return (data.transactions || []).map((t: any) => ({
+    return (data.transactions || []).map((t) => ({
       id: t.id,
       amount: parseFloat(t.amount || "0"),
       type: t.type,
@@ -89,10 +118,10 @@ export function BudgetsSection() {
     }));
   };
 
-  const fetchBudgets = async () => {
+  const fetchBudgets = async (): Promise<RawBudget[]> => {
     const res = await fetch(`/api/dashboard/budget?userId=${session?.user?.id}`);
     if (!res.ok) throw new Error("Failed to fetch budgets");
-    const data = await res.json();
+    const data = (await res.json()) as BudgetsResponse;
     return data.budgets ?? [];
   };
 
@@ -110,7 +139,7 @@ export function BudgetsSection() {
     staleTime: 1000 * 60 * 5,
   });
 
-  const budgetList: Budget[] = (budgetsData || []).map((b: any) => {
+  const budgetList: Budget[] = (budgetsData || []).map((b) => {
     const spent = transactionList
       .filter(
         (tx) =>
@@ -132,7 +161,7 @@ export function BudgetsSection() {
   const isData = budgetList.length > 0;
 
   const addBudgetMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: AddBudgetPayload) => {
       const res = await fetch("/api/dashboard/budget", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

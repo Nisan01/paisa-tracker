@@ -64,6 +64,51 @@ interface TripExpense {
   date: string;
 }
 
+type RawTrip = {
+  id: string;
+  name: string;
+  destination: string;
+  startDate?: string | Date | null;
+  endDate?: string | Date | null;
+  budget: string | number;
+  status?: "upcoming" | "active" | "completed";
+  createdAt?: string | Date | null;
+};
+
+type RawTripExpense = {
+  id: string;
+  tripId: string;
+  description: string;
+  amount: string | number;
+  category: string;
+  date?: string | Date | null;
+};
+
+type TripsResponse = {
+  trips?: RawTrip[];
+};
+
+type TripExpensesResponse = {
+  expenses?: RawTripExpense[];
+};
+
+type AddTripPayload = {
+  userId: string;
+  name: string;
+  destination: string;
+  startDate: string;
+  endDate: string;
+  budget: number;
+};
+
+type AddExpensePayload = {
+  tripId: string;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+};
+
 const expenseCategories = [
   "Transport",
   "Accommodation",
@@ -109,7 +154,7 @@ export function TripsSection() {
   const [newTripEndDate, setNewTripEndDate] = useState("");
   const [newTripBudget, setNewTripBudget] = useState("");
 
-  const formatTrips = (raw: any[]) =>
+  const formatTrips = (raw: RawTrip[]) =>
     raw.map((t) => ({
       id: t.id,
       name: t.name,
@@ -126,9 +171,9 @@ export function TripsSection() {
     const allExpenses: TripExpense[] = [];
     for (const trip of formattedTrips) {
       const expRes = await fetch(`/api/dashboard/trip?tripId=${trip.id}`);
-      const expData = await expRes.json();
+      const expData = (await expRes.json()) as TripExpensesResponse;
       if (expData.expenses) {
-        expData.expenses.forEach((e: any) => {
+        expData.expenses.forEach((e) => {
           allExpenses.push({
             id: e.id,
             tripId: e.tripId,
@@ -146,7 +191,7 @@ export function TripsSection() {
   const fetchTrips = async (): Promise<Trip[]> => {
     const res = await fetch(`/api/dashboard/trip?userId=${session?.user?.id}`);
     if (!res.ok) throw new Error("Failed to fetch trips");
-    const data = await res.json();
+    const data = (await res.json()) as TripsResponse;
     return formatTrips(data.trips || []);
   };
 
@@ -202,7 +247,7 @@ export function TripsSection() {
   };
 
   const addTripMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: AddTripPayload) => {
       const res = await fetch("/api/dashboard/trip", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -249,7 +294,7 @@ export function TripsSection() {
   };
 
   const addExpenseMutation = useMutation({
-    mutationFn: async (payload: any) => {
+    mutationFn: async (payload: AddExpensePayload) => {
       const res = await fetch("/api/dashboard/trip?type=expense", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },

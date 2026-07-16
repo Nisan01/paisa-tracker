@@ -39,7 +39,7 @@ export default function SearchChanged() {
         {...fadeUp(0.1)}
         className="text-muted-foreground text-lg max-w-2xl mx-auto mt-8 mb-24"
       >
-        Most of your spending happens across places that don't talk to each other. PaisaTracker brings them into one calm view.
+        Most of your spending happens across places that don&apos;t talk to each other. PaisaTracker brings them into one calm view.
       </motion.p>
 
       <div className="grid md:grid-cols-3 gap-12 md:gap-8 mb-20 max-w-5xl mx-auto">
@@ -55,7 +55,7 @@ export default function SearchChanged() {
       </div>
 
       <motion.p {...fadeUp(0.2)} className="text-muted-foreground text-sm">
-        If you don't track where it goes, it decides for you.
+        If you don&apos;t track where it goes, it decides for you.
       </motion.p>
     </section>
   );
