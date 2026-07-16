@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import type { Section } from "@/app/dashboard/page";
-import { Bell, Search, Calendar, ArrowRight, ArrowRightLeft, X, LogOut, Mail, UserRound } from "lucide-react";
+import { Bell, Calendar, ArrowRight, ArrowRightLeft, X, LogOut, Mail, UserRound } from "lucide-react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,14 +36,13 @@ const sectionTitles: Record<Section, string> = {
 };
 
 export function Header({ activeSection, refreshLoans }: HeaderProps) {
-  const [searchFocused, setSearchFocused] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [nearDueLoans, setNearDueLoans] = useState<NearDueLoan[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState(false);
   const notificationRef = useRef<HTMLDivElement>(null);
   const accountRef = useRef<HTMLDivElement>(null);
   const accountCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [seenLoanRefresh, setSeenLoanRefresh] = useState(refreshLoans);
+  const [seenNotificationKey, setSeenNotificationKey] = useState<string | null>(null);
   const [isAccountOpen, setIsAccountOpen] = useState(false);
   const [isAccountClosing, setIsAccountClosing] = useState(false);
   const { data: session, status } = useSession();
@@ -161,6 +160,10 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
     return "2+";
   };
 
+  const notificationKey = `${refreshLoans}:${nearDueLoans
+    .map((loan) => `${loan.id}-${loan.dueDate ?? ""}-${loan.remainingAmount}`)
+    .join("|")}`;
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -183,10 +186,13 @@ export function Header({ activeSection, refreshLoans }: HeaderProps) {
         <div className="relative " ref={notificationRef}>
           <button
             className="relative w-9 h-9 flex items-center cursor-pointer justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-mist-600 transition-all duration-200"
-            onClick={() => { setIsNotificationOpen(!isNotificationOpen); setSeenLoanRefresh(refreshLoans); }}
+            onClick={() => {
+              setIsNotificationOpen(!isNotificationOpen);
+              setSeenNotificationKey(notificationKey);
+            }}
           >
             <Bell className="w-5 h-5 text-yellow-500" />
-            {nearDueLoans.length > 0 && seenLoanRefresh !== refreshLoans && (
+            {nearDueLoans.length > 0 && seenNotificationKey !== notificationKey && (
               <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full px-1">
                 {getBadgeDisplay()}
               </span>
