@@ -2,9 +2,6 @@
 
 
 import { motion } from "framer-motion";
-import avatar1 from "@/assets/avatar-1.png";
-import avatar2 from "@/assets/avatar-2.png";
-import avatar3 from "@/assets/avatar-3.png";
 import { Highlighter } from "@/components/ui/highlighter"
 import Link from "next/link";
 import RollingDigits from "./RollingDigits";

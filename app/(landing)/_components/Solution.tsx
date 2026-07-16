@@ -9,13 +9,6 @@ const fadeUp = (delay: number) => ({
   transition: { duration: 0.6, delay, ease: [0.22, 1, 0.36, 1] as const },
 });
 
-const features = [
-  { title: "Accounts and balances", desc: "Track Cash, Bank, eSewa, Khalti and custom wallets, all your money in one place." },
-  { title: "Income and expenses", desc: "Log income and expenses with default categories or create your own custom tags." },
-  { title: "Loan tracking", desc: "Lend or borrow money with partial repayments, due dates, and contact tracking." },
-  { title: "Budgets and alerts", desc: "Set category limits, get budget alerts, and track spending with visual charts." },
-];
-
 export default function Solution() {
   return (
     <section id="solution" className="md:px-6  p-10  md:py-10 ">

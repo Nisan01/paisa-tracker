@@ -7,8 +7,6 @@ import { Resend } from "resend";
 type ReminderType = "7_days" | "3_days" | "1_day" | "due_today";
 type ReminderStatus = "sent" | "failed";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 function isAuthorized(req: Request) {
   const secret = process.env.CRON_SECRET;
 
@@ -125,6 +123,7 @@ async function handleLoanReminders(req: Request) {
   }
 
   const db = getDb();
+  const resend = new Resend(process.env.RESEND_API_KEY);
   const fromEmail =
     process.env.RESEND_FROM_EMAIL || "PaisaTracker <nishanchauhan2025@gmail.com>";
 
