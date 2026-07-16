@@ -112,7 +112,7 @@ export function BudgetsSection() {
 
     return (data.transactions || []).map((t) => ({
       id: t.id,
-      amount: parseFloat(t.amount || "0"),
+      amount: Number(t.amount || 0),
       type: t.type,
       category: t.category,
     }));
@@ -151,7 +151,7 @@ export function BudgetsSection() {
     return {
       id: b.id,
       category: b.category,
-      budget: parseFloat(b.amount),
+      budget: Number(b.amount),
       spent,
       period: b.period,
     };

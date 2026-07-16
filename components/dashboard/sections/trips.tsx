@@ -161,7 +161,7 @@ export function TripsSection() {
       destination: t.destination,
       startDate: t.startDate ? new Date(t.startDate).toISOString().split("T")[0] : "",
       endDate: t.endDate ? new Date(t.endDate).toISOString().split("T")[0] : "",
-      budget: parseFloat(t.budget),
+      budget: Number(t.budget),
       spent: 0,
       status: t.status || "upcoming",
       createdAt: t.createdAt ? new Date(t.createdAt).toISOString().split("T")[0] : "",
@@ -178,7 +178,7 @@ export function TripsSection() {
             id: e.id,
             tripId: e.tripId,
             description: e.description,
-            amount: parseFloat(e.amount),
+            amount: Number(e.amount),
             category: e.category,
             date: e.date ? new Date(e.date).toISOString().split("T")[0] : "",
           });

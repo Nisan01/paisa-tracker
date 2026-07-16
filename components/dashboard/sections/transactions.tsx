@@ -152,7 +152,7 @@ const visibleCategories = is1520 ? 11 : 9;
     return (data.transactions || []).map((t) => ({
       id: t.id,
       description: t.description || "",
-      amount: parseFloat(t.amount || "0"),
+      amount: Number(t.amount || 0),
       type: t.type,
       category: t.category,
       account: t.accountName || "Unknown",

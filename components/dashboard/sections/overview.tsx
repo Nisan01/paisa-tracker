@@ -30,10 +30,12 @@ interface OverviewData {
   budgetsData: OverviewBudget[];
 
   balanceChangeRate: number;
-  loanData: unknown[];
+  loanData: OverviewLoan[];
 }
 
 type OverviewTransaction = {
+  id?: string;
+  description?: string | null;
   amount?: string | number | null;
   type?: "income" | "expense" | string;
   category?: string | null;
@@ -43,6 +45,20 @@ type OverviewTransaction = {
 type OverviewBudget = {
   category?: string | null;
   amount?: string | number | null;
+};
+
+type OverviewLoan = {
+  id: string;
+  userId: string;
+  personName: string;
+  totalAmount: string | number;
+  remainingAmount: string | number;
+  dueDate: string | Date;
+  type: "lent" | "borrowed";
+  status: "active" | "pending" | "paid";
+  notes?: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 };
 
 type Account = {
@@ -149,7 +165,7 @@ export function OverviewSection({ onNavigate }: Props) {
         .reduce((sum, tx) => sum + Number(tx.amount || 0), 0);
 
       return {
-        category: budget.category,
+        category: budget.category || "Uncategorized",
         budget: Number(budget.amount || 0),
         spent,
       };
@@ -269,10 +285,30 @@ export function OverviewSection({ onNavigate }: Props) {
 
   const budgetData =
     overviewData?.budgetsData.map((b, index) => ({
-      name: b.category,
+      name: b.category || "Uncategorized",
       value: Number(b.amount || 0),
       color: colorList[index % colorList.length],
     })) || [];
+
+  const recentTransactions = (overviewData?.transactionsData || [])
+    .slice(0, 4)
+    .map((tx, index) => ({
+      id: tx.id || `transaction-${index}`,
+      description: tx.description || "Transaction",
+      amount: Number(tx.amount || 0),
+      type: (tx.type === "income" ? "income" : "expense") as "income" | "expense",
+      category: tx.category || "Uncategorized",
+      date: tx.date ? new Date(tx.date).toISOString() : new Date().toISOString(),
+    }));
+
+  const loanStatusData = (overviewData?.loanData || []).map((loan) => ({
+    ...loan,
+    totalAmount: Number(loan.totalAmount || 0),
+    remainingAmount: Number(loan.remainingAmount || 0),
+    dueDate: new Date(loan.dueDate).toISOString(),
+    createdAt: new Date(loan.createdAt).toISOString(),
+    updatedAt: new Date(loan.updatedAt).toISOString(),
+  }));
 
   if (error) {
     return <div>Failed to load overview data.</div>;
@@ -431,7 +467,7 @@ export function OverviewSection({ onNavigate }: Props) {
       {/* BOTTOM SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 min-h-[55vh]">
         <RecentTransactions
-          transactions={overviewData?.transactionsData?.slice(0, 4) || []}
+          transactions={recentTransactions}
           onNavigateSection={onNavigate}
         />
 
@@ -442,7 +478,7 @@ export function OverviewSection({ onNavigate }: Props) {
       </div>
 
       {/* LOANS */}
-      <LoanStatus loans={overviewData?.loanData || []} />
+      <LoanStatus loans={loanStatusData} />
     </div>
   );
 }

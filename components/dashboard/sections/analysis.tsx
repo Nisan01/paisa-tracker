@@ -68,7 +68,7 @@ export function AnalysisSection({ onNavigate }: { onNavigate?: (section: Section
 
     return (data.transactions || []).map((t) => ({
       id: t.id,
-      amount: parseFloat(t.amount || "0"),
+      amount: Number(t.amount || 0),
       type: t.type,
       category: t.category || "Uncategorized",
     }));
